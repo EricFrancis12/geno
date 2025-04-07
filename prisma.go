@@ -53,6 +53,11 @@ func (e PrismaEnum) parse(p *Parser) (bool, ParseHandler) {
 func (e PrismaEnum) handle(ctx *GenContext) {
 	fmt.Println("TODO: Enum.handle()")
 
+	for _, variant := range e.Variants {
+		fmt.Printf("variant: %s\n", variant.Key)
+		fmt.Printf("variant value: %s\n", variant.Value)
+	}
+
 	// Create a new parser to backtrack to the start of the enum token
 	p := NewBaseParser(ctx.sourceFiles[ctx.sourceFilePos])
 	p.seekTokenAt(ctx.fileCursorPos)

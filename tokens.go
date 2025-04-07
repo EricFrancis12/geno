@@ -42,11 +42,9 @@ func (t BaseToken) parse(p *Parser) (bool, ParseHandler) {
 
 type TokenKind int
 
+// TODO: categorize these into groups better
 const (
 	EOF TokenKind = iota
-	NULL
-	TRUE
-	FALSE
 	NUMBER
 	STRING
 	IDENTIFIER
@@ -59,7 +57,7 @@ const (
 	OPEN_PAREN
 	CLOSE_PAREN
 
-	// Equivilance
+	// Equivalence
 	ASSIGNMENT
 	EQUALS
 	NOT_EQUALS
@@ -91,7 +89,7 @@ const (
 	MINUS_EQUALS
 	NULLISH_ASSIGNMENT // ??=
 
-	//Maths
+	// Maths
 	PLUS
 	DASH
 	SLASH
@@ -99,6 +97,10 @@ const (
 	PERCENT
 
 	// Reserved Keywords
+	NULL
+	TRUE
+	FALSE
+	VAR
 	LET
 	CONST
 	CLASS
@@ -116,33 +118,100 @@ const (
 	ENUM
 	TYPE
 	IOTA
+	PACKAGE
+	DEFER
+	GO
+	SELECT
+	INTERFACE
+	CHAN
+	MAP
+	STRUCT
+	FALLTHROUGH
+	BREAK
+	CONTINUE
+	RANGE
+	RETURN
+	SWITCH
+	CASE
+	DEFAULT
+	ABSTRACT
+	ASYNC
+	AWAIT
+	IMPLEMENTS
+	NAMESPACE
+	MODULE
+	DECLARE
+	PRIVATE
+	PROTECTED
+	PUBLIC
+	READONLY
+	STATIC
+	SUPER
+	YIELD
+	AS
+	ANY
+	NEVER
+	VOID
 
 	// Misc
 	COMMENT
-
-	// Unknown
 	UNKNOWN
 )
 
 var reservedTokensLookup map[string]TokenKind = map[string]TokenKind{
-	"true":    TRUE,
-	"false":   FALSE,
-	"null":    NULL,
-	"let":     LET,
-	"const":   CONST,
-	"class":   CLASS,
-	"import":  IMPORT,
-	"from":    FROM,
-	"fn":      FN,
-	"if":      IF,
-	"else":    ELSE,
-	"foreach": FOREACH,
-	"while":   WHILE,
-	"for":     FOR,
-	"export":  EXPORT,
-	"typeof":  TYPEOF,
-	"in":      IN,
-	"enum":    ENUM,
-	"type":    TYPE,
-	"iota":    IOTA,
+	"true":        TRUE,
+	"false":       FALSE,
+	"null":        NULL,
+	"let":         LET,
+	"const":       CONST,
+	"class":       CLASS,
+	"import":      IMPORT,
+	"from":        FROM,
+	"fn":          FN,
+	"if":          IF,
+	"else":        ELSE,
+	"foreach":     FOREACH,
+	"while":       WHILE,
+	"for":         FOR,
+	"export":      EXPORT,
+	"typeof":      TYPEOF,
+	"in":          IN,
+	"enum":        ENUM,
+	"type":        TYPE,
+	"iota":        IOTA,
+	"package":     PACKAGE,
+	"defer":       DEFER,
+	"go":          GO,
+	"select":      SELECT,
+	"interface":   INTERFACE,
+	"chan":        CHAN,
+	"map":         MAP,
+	"struct":      STRUCT,
+	"fallthrough": FALLTHROUGH,
+	"break":       BREAK,
+	"continue":    CONTINUE,
+	"range":       RANGE,
+	"return":      RETURN,
+	"switch":      SWITCH,
+	"case":        CASE,
+	"default":     DEFAULT,
+	"var":         VAR,
+	"abstract":    ABSTRACT,
+	"async":       ASYNC,
+	"await":       AWAIT,
+	"implements":  IMPLEMENTS,
+	"namespace":   NAMESPACE,
+	"module":      MODULE,
+	"declare":     DECLARE,
+	"private":     PRIVATE,
+	"protected":   PROTECTED,
+	"public":      PUBLIC,
+	"readonly":    READONLY,
+	"static":      STATIC,
+	"super":       SUPER,
+	"yield":       YIELD,
+	"as":          AS,
+	"any":         ANY,
+	"never":       NEVER,
+	"void":        VOID,
 }
