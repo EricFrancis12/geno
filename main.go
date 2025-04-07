@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 func main() {
-	l := LAP{}
-	l.addTrigger(PrismaEnum{})
+	e := NewGenEngine()
+	e.addTriggers(PrismaEnum{})
 
 	source := `
 		enum Foo {
@@ -20,7 +20,7 @@ func main() {
 		content: source,
 	}
 
-	cgs := l.genAll(sourceFile)
+	cgs := e.gen(sourceFile)
 	for _, cg := range cgs {
 		fmt.Printf("cg.outputPath: %s", cg.outputPath)
 		fmt.Printf("len(cg.code): %d", len(cg.code))

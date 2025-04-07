@@ -3,22 +3,26 @@ package main
 type Parser struct {
 	sourceFile SourceFile
 
-	tokens []TokenWithFilePos
-	pos    int // Current position (index) in the token list
+	positionedTokens []PositionedToken
+	pos              int // Current position (index) in positionedTokens
 }
 
-func NewParser(sourceFile SourceFile, tokenizerFunc func(string) []TokenWithFilePos) *Parser {
+func NewParser(sourceFile SourceFile, tokenizerFunc func(string) []PositionedToken) *Parser {
 	return &Parser{
-		sourceFile: sourceFile,
-		tokens:     tokenizerFunc(sourceFile.content),
+		sourceFile:       sourceFile,
+		positionedTokens: tokenizerFunc(sourceFile.content),
 	}
 }
 
-func NewBasicParser(sourceFile SourceFile) *Parser {
+func NewBaseParser(sourceFile SourceFile) *Parser {
 	return &Parser{
-		sourceFile: sourceFile,
-		tokens:     Tokenize(sourceFile.content),
+		sourceFile:       sourceFile,
+		positionedTokens: Tokenize(sourceFile.content),
 	}
+}
+
+func (p *Parser) atEOF() bool {
+	return p.pos >= len(p.positionedTokens)
 }
 
 func (p *Parser) getPos() int {
@@ -29,19 +33,19 @@ func (p *Parser) setPos(pos int) {
 	p.pos = pos
 }
 
-func (p *Parser) fileCursorPos() int {
-	return p.tokens[p.pos].FilePos
+func (p *Parser) cursorPos() int {
+	return p.positionedTokens[p.pos].CursorPos
 }
 
-func (p *Parser) toFileCursorPos(fcp int) {
-	p.setPos(0)
-	for p.fileCursorPos() < fcp {
+func (p *Parser) seekToNearestToken(cursorPos int) {
+	p.setPos(0) // Reset the parser position to the start of the file
+	for p.cursorPos() < cursorPos {
 		p.advance() // Advance the parser until we reach the desired file cursor position
 	}
 }
 
 func (p *Parser) currentToken() Token {
-	return p.tokens[p.pos].Token
+	return p.positionedTokens[p.pos].Token
 }
 
 func (p *Parser) advance() Token {
@@ -51,6 +55,7 @@ func (p *Parser) advance() Token {
 func (p *Parser) advanceN(n int) Token {
 	tk := p.currentToken()
 	newPos := p.pos + n
+	// If n is negative, we don't want to go past the start of the token list
 	if newPos < 0 {
 		newPos = 0
 	}
@@ -58,47 +63,35 @@ func (p *Parser) advanceN(n int) Token {
 	return tk
 }
 
-func (p *Parser) advanceBasicTo(kinds ...TokenKind) (Token, bool) {
-	i := 0
+func (p *Parser) advanceBaseTo(kinds ...TokenKind) (BaseToken, bool) {
 	for _, kind := range kinds {
-		i++
-		if p.advanceBasic().kind != kind {
-			return p.currentBasicToken(), false
+		if p.advanceBase().kind != kind {
+			return p.currentBaseToken(), false
 		}
 	}
-	return p.currentBasicToken(), true
+	return p.currentBaseToken(), true
 }
 
-func (p *Parser) currentBasicToken() BasicToken {
-	tk, ok := p.currentToken().(BasicToken)
+func (p *Parser) currentBaseToken() BaseToken {
+	tk, ok := p.currentToken().(BaseToken)
 	if !ok {
-		return BasicToken{
+		return BaseToken{
 			kind: UNKNOWN,
 		}
 	}
 	return tk
 }
 
-func (p *Parser) advanceBasic() BasicToken {
-	tk, ok := p.advance().(BasicToken)
+func (p *Parser) advanceBase() BaseToken {
+	return p.advanceBaseN(1)
+}
+
+func (p *Parser) advanceBaseN(n int) BaseToken {
+	tk, ok := p.advanceN(n).(BaseToken)
 	if !ok {
-		return BasicToken{
+		return BaseToken{
 			kind: UNKNOWN,
 		}
 	}
 	return tk
-}
-
-func (p *Parser) advanceBasicN(n int) BasicToken {
-	tk, ok := p.advanceN(n).(BasicToken)
-	if !ok {
-		return BasicToken{
-			kind: UNKNOWN,
-		}
-	}
-	return tk
-}
-
-func (p *Parser) atEOF() bool {
-	return p.pos >= len(p.tokens)
 }

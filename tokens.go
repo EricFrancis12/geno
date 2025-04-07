@@ -4,25 +4,36 @@ type Token interface {
 	parse(*Parser) (bool, ParseHandler)
 }
 
-type TokenWithFilePos struct {
-	Token   Token
-	FilePos int // Length of the token in the source file
+type PositionedToken struct {
+	Token     Token
+	CursorPos int // The cursor position immedtely to the left of the token in the source file
 }
 
-type BasicToken struct {
+func newPositionedToken(t Token, cursorPos int) PositionedToken {
+	return PositionedToken{
+		Token:     t,
+		CursorPos: cursorPos,
+	}
+}
+
+type BaseToken struct {
 	kind  TokenKind
 	Value string
 }
 
-func newBasicToken(kind TokenKind, value string) BasicToken {
-	return BasicToken{
+func newBaseToken(kind TokenKind, value string) BaseToken {
+	return BaseToken{
 		kind:  kind,
 		Value: value,
 	}
 }
 
-func (t BasicToken) parse(p *Parser) (bool, ParseHandler) {
-	bt, ok := p.advance().(BasicToken)
+func (t BaseToken) withPos(cursorPos int) PositionedToken {
+	return newPositionedToken(t, cursorPos)
+}
+
+func (t BaseToken) parse(p *Parser) (bool, ParseHandler) {
+	bt, ok := p.advance().(BaseToken)
 	if !ok {
 		return false, nil
 	}

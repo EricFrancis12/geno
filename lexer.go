@@ -11,13 +11,13 @@ type regexPattern struct {
 }
 
 type lexer struct {
-	patterns []regexPattern
-	Tokens   []TokenWithFilePos
-	source   string
-	pos      int
+	patterns         []regexPattern
+	positionedTokens []PositionedToken
+	source           string
+	cursorPos        int
 }
 
-func Tokenize(source string) []TokenWithFilePos {
+func Tokenize(source string) []PositionedToken {
 	lex := createLexer(source)
 
 outerLoop:
@@ -30,43 +30,34 @@ outerLoop:
 			}
 		}
 		lex.advanceN(1)
-
-		t := TokenWithFilePos{
-			Token:   newBasicToken(UNKNOWN, lex.remainder()[:1]),
-			FilePos: lex.pos + 1,
-		}
-		lex.push(t)
+		lex.push(newBaseToken(UNKNOWN, lex.remainder()[:1]))
 	}
 
-	t := TokenWithFilePos{
-		Token:   newBasicToken(EOF, "EOF"),
-		FilePos: lex.pos,
-	}
-	lex.push(t)
-	return lex.Tokens
+	lex.push(newBaseToken(EOF, "EOF"))
+	return lex.positionedTokens
 }
 
 func (lex *lexer) advanceN(n int) {
-	lex.pos += n
+	lex.cursorPos += n
 }
 
 func (lex *lexer) remainder() string {
-	return lex.source[lex.pos:]
+	return lex.source[lex.cursorPos:]
 }
 
-func (lex *lexer) push(token TokenWithFilePos) {
-	lex.Tokens = append(lex.Tokens, token)
+func (lex *lexer) push(bt BaseToken) {
+	lex.positionedTokens = append(lex.positionedTokens, bt.withPos(lex.cursorPos))
 }
 
 func (lex *lexer) atEOF() bool {
-	return lex.pos >= len(lex.source)
+	return lex.cursorPos >= len(lex.source)
 }
 
 func createLexer(source string) *lexer {
 	return &lexer{
-		pos:    0,
-		source: source,
-		Tokens: make([]TokenWithFilePos, 0),
+		cursorPos:        0,
+		source:           source,
+		positionedTokens: make([]PositionedToken, 0),
 		patterns: []regexPattern{
 			{regexp.MustCompile(`\s+`), skipHandler},
 			{regexp.MustCompile(`\/\/.*`), commentHandler},
@@ -116,12 +107,7 @@ type regexHandler func(lex *lexer, regex *regexp.Regexp)
 // This handler is used with most simple tokens.
 func defaultHandler(kind TokenKind, value string) regexHandler {
 	return func(lex *lexer, _ *regexp.Regexp) {
-		t := TokenWithFilePos{
-			Token:   newBasicToken(kind, value),
-			FilePos: lex.pos,
-		}
-		lex.push(t)
-
+		lex.push(newBaseToken(kind, value))
 		lex.advanceN(len(value))
 	}
 }
@@ -130,38 +116,24 @@ func stringHandler(lex *lexer, regex *regexp.Regexp) {
 	match := regex.FindStringIndex(lex.remainder())
 	stringLiteral := lex.remainder()[match[0]:match[1]]
 
-	t := TokenWithFilePos{
-		Token:   newBasicToken(STRING, stringLiteral),
-		FilePos: lex.pos,
-	}
-	lex.push(t)
-
+	lex.push(newBaseToken(STRING, stringLiteral))
 	lex.advanceN(len(stringLiteral))
 }
 
 func numberHandler(lex *lexer, regex *regexp.Regexp) {
 	match := regex.FindString(lex.remainder())
-
-	t := TokenWithFilePos{
-		Token:   newBasicToken(NUMBER, match),
-		FilePos: lex.pos,
-	}
-	lex.push(t)
-
+	lex.push(newBaseToken(NUMBER, match))
 	lex.advanceN(len(match))
 }
 
 func symbolHandler(lex *lexer, regex *regexp.Regexp) {
 	match := regex.FindString(lex.remainder())
-	t := TokenWithFilePos{
-		Token:   newBasicToken(IDENTIFIER, match),
-		FilePos: lex.pos,
-	}
+	t := newBaseToken(IDENTIFIER, match)
 	if kind, found := reservedTokensLookup[match]; found {
-		t.Token = newBasicToken(kind, match)
+		t = newBaseToken(kind, match)
 	}
-	lex.push(t)
 
+	lex.push(t)
 	lex.advanceN(len(match))
 }
 
@@ -175,11 +147,7 @@ func commentHandler(lex *lexer, regex *regexp.Regexp) {
 	if match != nil {
 		commentLiteral := lex.remainder()[match[0]:match[1]]
 		if strings.HasPrefix(commentLiteral, "//") {
-			t := TokenWithFilePos{
-				Token:   newBasicToken(COMMENT, commentLiteral),
-				FilePos: lex.pos,
-			}
-			lex.push(t)
+			lex.push(newBaseToken(COMMENT, commentLiteral))
 
 			// Advance past the entire comment.
 			lex.advanceN(match[1])
