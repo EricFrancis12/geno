@@ -53,8 +53,9 @@ func (e PrismaEnum) parse(p *Parser) (bool, ParseHandler) {
 func (e PrismaEnum) handle(ctx *GenContext) {
 	fmt.Println("TODO: Enum.handle()")
 
+	// Create a new parser to backtrack to the start of the enum token
 	p := NewBaseParser(ctx.sourceFiles[ctx.sourceFilePos])
-	p.seekToNearestToken(ctx.fileCursorPos)
+	p.seekTokenAt(ctx.fileCursorPos)
 
 	// File cursor starts positioned past the closing curly brace token, and
 	// to the immediate left of the next token in line (comment token)

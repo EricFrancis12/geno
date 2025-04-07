@@ -37,7 +37,7 @@ func (p *Parser) cursorPos() int {
 	return p.positionedTokens[p.pos].CursorPos
 }
 
-func (p *Parser) seekToNearestToken(cursorPos int) {
+func (p *Parser) seekTokenAt(cursorPos int) {
 	p.setPos(0) // Reset the parser position to the start of the file
 	for p.cursorPos() < cursorPos {
 		p.advance() // Advance the parser until we reach the desired file cursor position

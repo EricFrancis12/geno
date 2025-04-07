@@ -47,8 +47,8 @@ func (e *GenEngine) gen(sourceFiles ...SourceFile) []CodeGen {
 
 					h.handle(ctx)
 				} else {
-					// Reset the parser to the last position
-					p.setPos(posBefore)
+					// Reset the parser to the last position + 1 to advance to the next token
+					p.setPos(posBefore + 1)
 				}
 			}
 		}
