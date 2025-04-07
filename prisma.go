@@ -62,11 +62,18 @@ func (e PrismaEnum) handle(ctx *GenContext) {
 	fmt.Printf("cursorPos before: %d\n", p.cursorPos())
 	fmt.Printf("left slice before: %s\n", ctx.sourceFiles[ctx.sourceFilePos].content[:p.cursorPos()])
 
-	for p.advanceBaseN(-1).kind != ENUM {
-		// Advance the parser until we reach the enum token
+	// Advance the parser until we reach the enum token
+	for p.currentBaseToken().kind != ENUM {
+		p.advanceBaseN(-1)
 	}
 
 	// File cursor is now positioned to the immediate left of the enum token
 	fmt.Printf("cursorPos after: %d\n", p.cursorPos())
 	fmt.Printf("left slice after: %s\n", ctx.sourceFiles[ctx.sourceFilePos].content[:p.cursorPos()])
+
+	// Advance the parser to the immediate left of the comment token
+	p.advanceBaseN(-1)
+
+	fmt.Printf("should be a comment token: %d\n", p.currentBaseToken().kind)
+	fmt.Printf("token value: %s\n", p.currentBaseToken().Value)
 }

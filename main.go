@@ -7,6 +7,7 @@ func main() {
 	e.addTriggers(PrismaEnum{}, PrismaEnum{})
 
 	source := `
+		// This is a comment
 		enum Foo {
     		BAR
     		BAZ
