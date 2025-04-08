@@ -35,25 +35,25 @@ func ParseCommentDirectives(s string) ([]Directive, bool) {
 		return directives, false
 	}
 
-	for p.CurrentBaseToken().Kind != geno.CLOSE_BRACKET && p.CurrentBaseToken().Kind != geno.EOF {
-		btk := p.AdvanceBase()
-		if btk.Kind != geno.IDENTIFIER {
-			return []Directive{}, false
-		}
-
+	for p.CurrentBaseToken().Kind != geno.CLOSE_BRACKET {
 		d := Directive{
-			Name:   btk.Value,
+			Name:   p.AdvanceBase().Value,
 			Params: []string{},
 		}
 
 		if p.CurrentBaseToken().Kind == geno.OPEN_PAREN {
-			for p.AdvanceBase().Kind != geno.CLOSE_PAREN {
-				if p.CurrentBaseToken().Kind == geno.IDENTIFIER {
-					d.Params = append(d.Params, p.CurrentBaseToken().Value)
-				} else if p.CurrentBaseToken().Kind == geno.COMMA {
+			p.Advance()
+
+			for p.CurrentBaseToken().Kind != geno.CLOSE_PAREN {
+				d.Params = append(d.Params, p.AdvanceBase().Value)
+
+				if p.CurrentBaseToken().Kind == geno.COMMA {
 					p.Advance()
 				}
 			}
+
+			// Advance past the closing parenthesis
+			p.Advance()
 		}
 
 		directives = append(directives, d)

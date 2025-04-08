@@ -53,6 +53,33 @@ func TestParseCommentDirectives(t *testing.T) {
 				{Name: "foo", Params: []string{"bar"}},
 			},
 		},
+		{
+			source: `// #[foo(bar, baz)]`,
+			expected: []Directive{
+				{Name: "foo", Params: []string{"bar", "baz"}},
+			},
+		},
+		{
+			source: `// #[foo(bar, baz), qux]`,
+			expected: []Directive{
+				{Name: "foo", Params: []string{"bar", "baz"}},
+				{Name: "qux", Params: []string{}},
+			},
+		},
+		{
+			source: `// #[foo(bar, baz), qux()]`,
+			expected: []Directive{
+				{Name: "foo", Params: []string{"bar", "baz"}},
+				{Name: "qux", Params: []string{}},
+			},
+		},
+		{
+			source: `// #[foo(bar, baz), qux(quux)]`,
+			expected: []Directive{
+				{Name: "foo", Params: []string{"bar", "baz"}},
+				{Name: "qux", Params: []string{"quux"}},
+			},
+		},
 	}
 
 	for _, test := range tests {
