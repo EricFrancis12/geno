@@ -1,7 +1,7 @@
-package main
+package geno
 
 type Token interface {
-	parse(*Parser) (bool, ParseHandler)
+	Parse(*Parser) (bool, ParseHandler)
 }
 
 type PositionedToken struct {
@@ -9,7 +9,7 @@ type PositionedToken struct {
 	CursorPos int // The cursor position immedtely to the left of the token in the source file
 }
 
-func newPositionedToken(t Token, cursorPos int) PositionedToken {
+func NewPositionedToken(t Token, cursorPos int) PositionedToken {
 	return PositionedToken{
 		Token:     t,
 		CursorPos: cursorPos,
@@ -17,23 +17,23 @@ func newPositionedToken(t Token, cursorPos int) PositionedToken {
 }
 
 type BaseToken struct {
-	kind  TokenKind
+	Kind  TokenKind
 	Value string
 }
 
-func newBaseToken(kind TokenKind, value string) BaseToken {
+func NewBaseToken(kind TokenKind, value string) BaseToken {
 	return BaseToken{
-		kind:  kind,
+		Kind:  kind,
 		Value: value,
 	}
 }
 
-func (t BaseToken) withPos(cursorPos int) PositionedToken {
-	return newPositionedToken(t, cursorPos)
+func (t BaseToken) WithPos(cursorPos int) PositionedToken {
+	return NewPositionedToken(t, cursorPos)
 }
 
-func (t BaseToken) parse(p *Parser) (bool, ParseHandler) {
-	bt, ok := p.advance().(BaseToken)
+func (t BaseToken) Parse(p *Parser) (bool, ParseHandler) {
+	bt, ok := p.Advance().(BaseToken)
 	if !ok {
 		return false, nil
 	}

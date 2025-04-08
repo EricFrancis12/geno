@@ -1,64 +1,64 @@
-package main
+package geno
 
 type SourceFile struct {
-	name    string
-	content string
+	Name    string
+	Content string
 }
 
 type GenEngine struct {
-	triggers []GenTrigger
+	Triggers []GenTrigger
 }
 
 func NewGenEngine(triggers ...GenTrigger) *GenEngine {
 	return &GenEngine{
-		triggers: triggers,
+		Triggers: triggers,
 	}
 }
 
-func (e *GenEngine) addTrigger(trigger GenTrigger) {
-	e.triggers = append(e.triggers, trigger)
+func (e *GenEngine) AddTrigger(trigger GenTrigger) {
+	e.Triggers = append(e.Triggers, trigger)
 }
 
-func (e *GenEngine) addTriggers(triggers ...GenTrigger) {
+func (e *GenEngine) AddTriggers(triggers ...GenTrigger) {
 	for _, trigger := range triggers {
-		e.addTrigger(trigger)
+		e.AddTrigger(trigger)
 	}
 }
 
-func (e *GenEngine) gen(sourceFiles ...SourceFile) []CodeGen {
+func (e *GenEngine) Gen(sourceFiles ...SourceFile) []CodeGen {
 	ctx := &GenContext{
-		wipCodeGen:  []CodeGen{},
-		sourceFiles: sourceFiles,
+		WipCodeGen:  []CodeGen{},
+		SourceFiles: sourceFiles,
 	}
 
 	for i, sf := range sourceFiles {
-		ctx.sourceFilePos = i
-		for _, gt := range e.triggers {
+		ctx.SourceFilePos = i
+		for _, gt := range e.Triggers {
 			p := NewBaseParser(sf)
 
-			ctx.positionedTokens = p.positionedTokens
+			ctx.PositionedTokens = p.PositionedTokens
 
-			for !p.atEOF() {
-				posBefore := p.getPos()
+			for !p.AtEOF() {
+				posBefore := p.GetPos()
 
-				if ok, h := gt.parse(p); ok && h != nil {
-					ctx.fileCursorPos = p.cursorPos()
-					ctx.pos = p.getPos()
+				if ok, h := gt.Parse(p); ok && h != nil {
+					ctx.FileCursorPos = p.CursorPos()
+					ctx.Pos = p.GetPos()
 
-					h.handle(ctx)
+					h.Handle(ctx)
 				} else {
 					// Reset the parser to the last position + 1 to advance to the next token
-					p.setPos(posBefore + 1)
+					p.SetPos(posBefore + 1)
 				}
 			}
 		}
 	}
 
-	return ctx.wipCodeGen
+	return ctx.WipCodeGen
 }
 
 type ParseHandler interface {
-	handle(*GenContext)
+	Handle(*GenContext)
 }
 
 type GenTrigger interface {
@@ -67,17 +67,17 @@ type GenTrigger interface {
 }
 
 type GenContext struct {
-	wipCodeGen []CodeGen
+	WipCodeGen []CodeGen
 
-	sourceFiles   []SourceFile
-	sourceFilePos int // The index of the source file being parsed
-	fileCursorPos int // The cursor will be directly to the right of the last token parsed when passed into gen()
+	SourceFiles   []SourceFile
+	SourceFilePos int // The index of the source file being parsed
+	FileCursorPos int // The cursor will be directly to the right of the last token parsed when passed into gen()
 
-	positionedTokens []PositionedToken
-	pos              int // Current position (index) in positionedTokens
+	PositionedTokens []PositionedToken
+	Pos              int // Current position (index) in positionedTokens
 }
 
 type CodeGen struct {
-	code       string
-	outputPath string
+	Code       string
+	OutputPath string
 }
