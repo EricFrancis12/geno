@@ -24,7 +24,7 @@ func ParseCommentDirectives(s string) []Directive {
 
 		// Go char by char to find the closing bracket
 		// and trim the string to the closing bracket
-		for i := 0; i < len(s); i++ {
+		for i := range len(s) {
 			if s[i] == ']' {
 				s = s[:i]
 				break
@@ -32,13 +32,22 @@ func ParseCommentDirectives(s string) []Directive {
 		}
 
 		s = strings.TrimSpace(s)
+		if s == "" {
+			return directives
+		}
 
-		directive := Directive{}
+		directive := Directive{
+			Params: []string{},
+		}
 		parts := strings.SplitN(s, "(", 2)
 		directive.Name = strings.TrimSpace(parts[0])
 		if len(parts) > 1 {
 			paramsStr := strings.TrimSuffix(parts[1], ")")
-			directive.Params = strings.Split(paramsStr, ",")
+
+			if paramsStr != "" {
+				directive.Params = strings.Split(paramsStr, ",")
+			}
+
 			for i := range directive.Params {
 				directive.Params[i] = strings.TrimSpace(directive.Params[i])
 			}
