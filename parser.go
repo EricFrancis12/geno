@@ -7,17 +7,17 @@ type Parser struct {
 	Pos              int // Current position (index) in positionedTokens
 }
 
-func NewParser(sourceFile SourceFile, tokenizerFunc func(string) []PositionedToken) *Parser {
+func NewParser(sourceFile SourceFile, tokenLib TokenLib) *Parser {
 	return &Parser{
 		SourceFile:       sourceFile,
-		PositionedTokens: tokenizerFunc(sourceFile.Content),
+		PositionedTokens: tokenLib.Tokenize(sourceFile.Content),
 	}
 }
 
 func NewBaseParser(sourceFile SourceFile) *Parser {
 	return &Parser{
 		SourceFile:       sourceFile,
-		PositionedTokens: Tokenize(sourceFile.Content),
+		PositionedTokens: BaseTokenLib{}.Tokenize(sourceFile.Content),
 	}
 }
 
@@ -63,7 +63,7 @@ func (p *Parser) AdvanceN(n int) Token {
 	return tk
 }
 
-func (p *Parser) AdvanceBaseTo(kinds ...TokenKind) (BaseToken, bool) {
+func (p *Parser) AdvanceBaseTo(kinds ...BaseTokenKind) (BaseToken, bool) {
 	for _, kind := range kinds {
 		if p.AdvanceBase().Kind != kind {
 			return p.CurrentBaseToken(), false

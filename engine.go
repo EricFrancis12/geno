@@ -6,11 +6,20 @@ type SourceFile struct {
 }
 
 type GenEngine struct {
+	TokenLib TokenLib
 	Triggers []GenTrigger
 }
 
-func NewGenEngine(triggers ...GenTrigger) *GenEngine {
+func NewGenEngine(tokenLib TokenLib, triggers ...GenTrigger) *GenEngine {
 	return &GenEngine{
+		TokenLib: tokenLib,
+		Triggers: triggers,
+	}
+}
+
+func NewBaseGenEngine(triggers ...GenTrigger) *GenEngine {
+	return &GenEngine{
+		TokenLib: BaseTokenLib{},
 		Triggers: triggers,
 	}
 }
@@ -34,7 +43,7 @@ func (e *GenEngine) Gen(sourceFiles ...SourceFile) []CodeGen {
 	for i, sf := range sourceFiles {
 		ctx.SourceFilePos = i
 		for _, gt := range e.Triggers {
-			p := NewBaseParser(sf)
+			p := NewParser(sf, e.TokenLib)
 
 			ctx.PositionedTokens = p.PositionedTokens
 

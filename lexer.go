@@ -17,8 +17,10 @@ type Lexer struct {
 	CursorPos        int
 }
 
-func Tokenize(source string) []PositionedToken {
-	lex := CreateLexer(source)
+type BaseTokenLib struct{}
+
+func (b BaseTokenLib) Tokenize(source string) []PositionedToken {
+	lex := CreateBaseLexer(source)
 
 outerLoop:
 	for !lex.AtEOF() {
@@ -53,7 +55,9 @@ func (lex *Lexer) AtEOF() bool {
 	return lex.CursorPos >= len(lex.Source)
 }
 
-func CreateLexer(source string) *Lexer {
+type regexHandler func(lex *Lexer, regex *regexp.Regexp)
+
+func CreateBaseLexer(source string) *Lexer {
 	return &Lexer{
 		CursorPos:        0,
 		Source:           source,
@@ -101,11 +105,9 @@ func CreateLexer(source string) *Lexer {
 	}
 }
 
-type regexHandler func(lex *Lexer, regex *regexp.Regexp)
-
 // Default handler which will simply create a token with the matched contents.
 // This handler is used with most simple tokens.
-func defaultHandler(kind TokenKind, value string) regexHandler {
+func defaultHandler(kind BaseTokenKind, value string) regexHandler {
 	return func(lex *Lexer, _ *regexp.Regexp) {
 		lex.Push(NewBaseToken(kind, value))
 		lex.AdvanceN(len(value))
