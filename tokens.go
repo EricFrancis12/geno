@@ -154,7 +154,7 @@ const (
 	VOID
 
 	// Misc
-	COMMENT
+	COMMENT_DIRECTIVE
 	UNKNOWN
 )
 

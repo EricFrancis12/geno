@@ -146,8 +146,8 @@ func commentHandler(lex *Lexer, regex *regexp.Regexp) {
 	match := regex.FindStringIndex(lex.Remainder())
 	if match != nil {
 		commentLiteral := lex.Remainder()[match[0]:match[1]]
-		if strings.HasPrefix(commentLiteral, "//") {
-			lex.Push(NewBaseToken(COMMENT, commentLiteral))
+		if strings.HasPrefix(commentLiteral, "//#") || strings.HasPrefix(commentLiteral, "// #") {
+			lex.Push(NewBaseToken(COMMENT_DIRECTIVE, commentLiteral))
 
 			// Advance past the entire comment.
 			lex.AdvanceN(match[1])
