@@ -1,6 +1,10 @@
 package directive
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/EricFrancis12/geno"
+)
 
 type Directive struct {
 	Name   string
@@ -13,47 +17,51 @@ type Directive struct {
 // This comment would create 2 directives:
 // 1. Directive{Name: "foo", Params: []string{}}
 // 2. Directive{Name: "bar", Params: []string{"baz"}}
-func ParseCommentDirectives(s string) []Directive {
+func ParseCommentDirectives(s string) ([]Directive, bool) {
 	directives := []Directive{}
 
 	s = strings.TrimSpace(s)
-	if strings.HasPrefix(s, "//#") || strings.HasPrefix(s, "// #") {
-		s = strings.TrimPrefix(s, "//")
-		s = strings.TrimSpace(s)
-		s = strings.TrimPrefix(s, "#[")
-
-		// Go char by char to find the closing bracket
-		// and trim the string to the closing bracket
-		for i := range len(s) {
-			if s[i] == ']' {
-				s = s[:i]
-				break
-			}
-		}
-
-		s = strings.TrimSpace(s)
-		if s == "" {
-			return directives
-		}
-
-		directive := Directive{
-			Params: []string{},
-		}
-		parts := strings.SplitN(s, "(", 2)
-		directive.Name = strings.TrimSpace(parts[0])
-		if len(parts) > 1 {
-			paramsStr := strings.TrimSuffix(parts[1], ")")
-
-			if paramsStr != "" {
-				directive.Params = strings.Split(paramsStr, ",")
-			}
-
-			for i := range directive.Params {
-				directive.Params[i] = strings.TrimSpace(directive.Params[i])
-			}
-		}
-		directives = append(directives, directive)
+	if !strings.HasPrefix(s, "//#") && !strings.HasPrefix(s, "// #") {
+		return directives, false
 	}
 
-	return directives
+	// Remove the comment prefix
+	s = strings.TrimPrefix(s, "//")
+
+	// Create a new parser to parse the remaining comment content: #[foo, bar(baz)]
+	p := geno.NewBaseParser(geno.SourceFile{Content: s})
+
+	if _, ok := p.AdvanceBaseTo(geno.HASHTAG, geno.OPEN_BRACKET); !ok {
+		return directives, false
+	}
+
+	for p.CurrentBaseToken().Kind != geno.CLOSE_BRACKET && p.CurrentBaseToken().Kind != geno.EOF {
+		btk := p.AdvanceBase()
+		if btk.Kind != geno.IDENTIFIER {
+			return []Directive{}, false
+		}
+
+		d := Directive{
+			Name:   btk.Value,
+			Params: []string{},
+		}
+
+		if p.CurrentBaseToken().Kind == geno.OPEN_PAREN {
+			for p.AdvanceBase().Kind != geno.CLOSE_PAREN {
+				if p.CurrentBaseToken().Kind == geno.IDENTIFIER {
+					d.Params = append(d.Params, p.CurrentBaseToken().Value)
+				} else if p.CurrentBaseToken().Kind == geno.COMMA {
+					p.Advance()
+				}
+			}
+		}
+
+		directives = append(directives, d)
+
+		if p.CurrentBaseToken().Kind == geno.COMMA {
+			p.Advance()
+		}
+	}
+
+	return directives, true
 }

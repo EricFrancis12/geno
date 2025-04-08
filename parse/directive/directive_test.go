@@ -39,24 +39,25 @@ func TestParseCommentDirectives(t *testing.T) {
 				{Name: "foo", Params: []string{"bar"}},
 			},
 		},
-		// TODO: ...
-		// {
-		// 	source: `// #[foo(bar), baz]`,
-		// 	expected: []Directive{
-		// 		{Name: "foo", Params: []string{"bar"}},
-		// 		{Name: "baz", Params: []string{}},
-		// 	},
-		// },
-		// {
-		// 	source: `// #[baz, foo(bar)]`,
-		// 	expected: []Directive{
-		// 		{Name: "baz", Params: []string{}},
-		// 		{Name: "foo", Params: []string{"bar"}},
-		// 	},
-		// },
+		{
+			source: `// #[foo(bar), baz]`,
+			expected: []Directive{
+				{Name: "foo", Params: []string{"bar"}},
+				{Name: "baz", Params: []string{}},
+			},
+		},
+		{
+			source: `// #[baz, foo(bar)]`,
+			expected: []Directive{
+				{Name: "baz", Params: []string{}},
+				{Name: "foo", Params: []string{"bar"}},
+			},
+		},
 	}
 
 	for _, test := range tests {
-		assert.Equal(t, test.expected, ParseCommentDirectives(test.source))
+		ds, ok := ParseCommentDirectives(test.source)
+		assert.True(t, ok)
+		assert.Equal(t, test.expected, ds)
 	}
 }
