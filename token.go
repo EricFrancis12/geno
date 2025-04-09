@@ -21,13 +21,13 @@ type TokenParser interface {
 	Remainder() string
 }
 
-type TokenWithCursorPos[T Token] struct {
+type TokenFromSource[T Token] struct {
 	Token     T
 	CursorPos int
 }
 
-func NewTokenWithCursorPos[T Token](t T, cursorPos int) TokenWithCursorPos[T] {
-	return TokenWithCursorPos[T]{
+func NewTokenFromSource[T Token](t T, cursorPos int) TokenFromSource[T] {
+	return TokenFromSource[T]{
 		Token:     t,
 		CursorPos: cursorPos,
 	}

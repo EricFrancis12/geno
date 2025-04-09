@@ -18,8 +18,8 @@ func NewBaseToken(kind BaseTokenKind, value string) BaseToken {
 	}
 }
 
-func (t BaseToken) WithPos(cursorPos int) geno.TokenWithCursorPos[BaseToken] {
-	return geno.NewTokenWithCursorPos(t, cursorPos)
+func (t BaseToken) WithPos(cursorPos int) geno.TokenFromSource[BaseToken] {
+	return geno.NewTokenFromSource(t, cursorPos)
 }
 
 func (t BaseToken) FindString(s string) (geno.Token, string) {
@@ -33,8 +33,8 @@ func (t BaseToken) FindString(s string) (geno.Token, string) {
 
 	var tk geno.Token
 	// Check if the lexer matched a token
-	if len(l.PositionedTokens) > 0 {
-		tk = l.PositionedTokens[0].Token
+	if len(l.TokensFromSource) > 0 {
+		tk = l.TokensFromSource[0].Token
 	}
 
 	return tk, l.Source[:diff]

@@ -38,7 +38,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 			p := NewParser(sf, e.TokenLib)
 
 			// Update context positioned tokens
-			ctx.PositionedTokens = p.PositionedTokens
+			ctx.TokensFromSource = p.TokensFromSource
 
 			for !p.AtEOF() {
 				posBefore := p.Pos()
@@ -86,7 +86,7 @@ type GenContext[T Token] struct {
 	SourceFilePos int // The index of the source file being parsed
 	FileCursorPos int // The cursor will be directly to the right of the last token parsed when passed into gen()
 
-	PositionedTokens []TokenWithCursorPos[T]
+	TokensFromSource []TokenFromSource[T]
 	Pos              int // Current position (index) in positionedTokens
 }
 

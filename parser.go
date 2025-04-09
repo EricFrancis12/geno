@@ -3,19 +3,19 @@ package geno
 type Parser[T Token] struct {
 	SourceFile SourceFile
 
-	PositionedTokens []TokenWithCursorPos[T]
+	TokensFromSource []TokenFromSource[T]
 	Index            int
 }
 
 func NewParser[T Token](sourceFile SourceFile, tokenLib TokenLib[T]) *Parser[T] {
 	return &Parser[T]{
 		SourceFile:       sourceFile,
-		PositionedTokens: tokenLib.TokenizeWithPos(sourceFile.Content),
+		TokensFromSource: tokenLib.TokenizeWithTrace(sourceFile.Content),
 	}
 }
 
 func (p *Parser[T]) AtEOF() bool {
-	return p.Index >= len(p.PositionedTokens)
+	return p.Index >= len(p.TokensFromSource)
 }
 
 func (p *Parser[T]) Pos() int {
@@ -27,7 +27,7 @@ func (p *Parser[T]) SetPos(pos int) {
 }
 
 func (p *Parser[T]) CursorPos() int {
-	return p.PositionedTokens[p.Index].CursorPos
+	return p.TokensFromSource[p.Index].CursorPos
 }
 
 func (p *Parser[T]) SeekTokenAt(cursorPos int) {
@@ -38,7 +38,7 @@ func (p *Parser[T]) SeekTokenAt(cursorPos int) {
 }
 
 func (p *Parser[T]) CurrentToken() T {
-	return p.PositionedTokens[p.Index].Token
+	return p.TokensFromSource[p.Index].Token
 }
 
 func (p *Parser[T]) Advance() T {

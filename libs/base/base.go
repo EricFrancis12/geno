@@ -12,6 +12,6 @@ func NewBaseGenEngine(triggers ...geno.GenTrigger[BaseToken]) *geno.GenEngine[Ba
 func NewBaseParser(sourceFile geno.SourceFile) *geno.Parser[BaseToken] {
 	return &geno.Parser[BaseToken]{
 		SourceFile:       sourceFile,
-		PositionedTokens: BaseTokenLib{}.TokenizeWithPos(sourceFile.Content),
+		TokensFromSource: BaseTokenLib{}.TokenizeWithTrace(sourceFile.Content),
 	}
 }

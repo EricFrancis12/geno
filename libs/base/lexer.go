@@ -9,7 +9,7 @@ import (
 
 type Lexer struct {
 	Patterns         []RegexPattern
-	PositionedTokens []geno.TokenWithCursorPos[BaseToken]
+	TokensFromSource []geno.TokenFromSource[BaseToken]
 	Source           string
 	CursorPos        int
 }
@@ -34,7 +34,7 @@ func (l *Lexer) AdvanceN(n int) {
 }
 
 func (l *Lexer) Push(bt BaseToken) {
-	l.PositionedTokens = append(l.PositionedTokens, bt.WithPos(l.CursorPos))
+	l.TokensFromSource = append(l.TokensFromSource, bt.WithPos(l.CursorPos))
 }
 
 func (l *Lexer) Match() {
@@ -52,7 +52,7 @@ func (l *Lexer) Match() {
 func NewBaseLexer(source string) *Lexer {
 	return &Lexer{
 		Source:           source,
-		PositionedTokens: []geno.TokenWithCursorPos[BaseToken]{},
+		TokensFromSource: []geno.TokenFromSource[BaseToken]{},
 		Patterns: []RegexPattern{
 			{regexp.MustCompile(`\s+`), skipHandler},
 			{regexp.MustCompile(`\/\/.*`), commentHandler},

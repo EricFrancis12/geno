@@ -12,31 +12,31 @@ func (b *BaseTokenLib) AddToken(token geno.Token) {
 
 func (b BaseTokenLib) Tokenize(source string) []BaseToken {
 	baseTokens := []BaseToken{}
-	for _, twp := range b.TokenizeWithPos(source) {
+	for _, twp := range b.TokenizeWithTrace(source) {
 		baseTokens = append(baseTokens, twp.Token)
 	}
 	return baseTokens
 }
 
-func (b BaseTokenLib) TokenizeWithPos(source string) []geno.TokenWithCursorPos[BaseToken] {
+func (b BaseTokenLib) TokenizeWithTrace(source string) []geno.TokenFromSource[BaseToken] {
 	l := NewBaseLexer(source)
 
 	for !l.AtEOF() {
 		l.Match()
 	}
 
-	return l.PositionedTokens
+	return l.TokensFromSource
 }
 
-func (b BaseTokenLib) TokenizeWithPosAddl(source string) []geno.TokenWithCursorPos[geno.Token] {
-	result := []geno.TokenWithCursorPos[geno.Token]{}
+func (b BaseTokenLib) TokenizeWithTraceAddl(source string) []geno.TokenFromSource[geno.Token] {
+	result := []geno.TokenFromSource[geno.Token]{}
 
 	l := NewBaseLexer(source)
 
 eofLoop:
 	for !l.AtEOF() {
-		for _, pt := range l.PositionedTokens {
-			twcp, ok := any(pt).(geno.TokenWithCursorPos[geno.Token])
+		for _, pt := range l.TokensFromSource {
+			twcp, ok := any(pt).(geno.TokenFromSource[geno.Token])
 			if !ok {
 				panic("TODO")
 			}
@@ -44,12 +44,12 @@ eofLoop:
 		}
 
 		// Reset slice
-		l.PositionedTokens = []geno.TokenWithCursorPos[BaseToken]{}
+		l.TokensFromSource = []geno.TokenFromSource[BaseToken]{}
 
 		for _, tk := range b.addlTokens {
 			_tk, took := tk.FindString(l.Remainder())
 			if _tk != nil && len(took) > 0 {
-				result = append(result, geno.TokenWithCursorPos[geno.Token]{
+				result = append(result, geno.TokenFromSource[geno.Token]{
 					Token:     _tk,
 					CursorPos: l.CursorPos,
 				})
