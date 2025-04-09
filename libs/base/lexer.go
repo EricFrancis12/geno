@@ -9,7 +9,7 @@ import (
 
 type Lexer struct {
 	Patterns         []RegexPattern
-	PositionedTokens []geno.TokenWithCursorPos[*BaseToken]
+	PositionedTokens []geno.TokenWithCursorPos[BaseToken]
 	Source           string
 	CursorPos        int
 }
@@ -21,27 +21,38 @@ type RegexPattern struct {
 
 type RegexHandler func(l *Lexer, regex *regexp.Regexp)
 
-func (l *Lexer) AdvanceN(n int) {
-	l.CursorPos += n
+func (l Lexer) AtEOF() bool {
+	return l.CursorPos >= len(l.Source)
 }
 
-func (l *Lexer) Remainder() string {
+func (l Lexer) Remainder() string {
 	return l.Source[l.CursorPos:]
+}
+
+func (l *Lexer) AdvanceN(n int) {
+	l.CursorPos += n
 }
 
 func (l *Lexer) Push(bt BaseToken) {
 	l.PositionedTokens = append(l.PositionedTokens, bt.WithPos(l.CursorPos))
 }
 
-func (l *Lexer) AtEOF() bool {
-	return l.CursorPos >= len(l.Source)
+func (l *Lexer) Match() {
+	for _, pattern := range l.Patterns {
+		loc := pattern.Regex.FindStringIndex(l.Remainder())
+		if len(loc) != 0 && loc[0] == 0 {
+			pattern.Handler(l, pattern.Regex)
+			return
+		}
+	}
+	l.AdvanceN(1)
+	l.Push(NewBaseToken(UNKNOWN, l.Remainder()[:1]))
 }
 
 func NewBaseLexer(source string) *Lexer {
 	return &Lexer{
-		CursorPos:        0,
 		Source:           source,
-		PositionedTokens: make([]geno.TokenWithCursorPos[*BaseToken], 0),
+		PositionedTokens: []geno.TokenWithCursorPos[BaseToken]{},
 		Patterns: []RegexPattern{
 			{regexp.MustCompile(`\s+`), skipHandler},
 			{regexp.MustCompile(`\/\/.*`), commentHandler},

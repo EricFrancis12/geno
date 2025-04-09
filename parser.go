@@ -57,3 +57,11 @@ func (p *Parser[T]) AdvanceN(n int) T {
 
 	return tk
 }
+
+func (p *Parser[T]) GetSourceFile() SourceFile {
+	return p.SourceFile
+}
+
+func (p *Parser[T]) Remainder() string {
+	return p.SourceFile.Content[p.CursorPos():]
+}

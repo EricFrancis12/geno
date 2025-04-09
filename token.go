@@ -1,8 +1,8 @@
 package geno
 
 type Token interface {
-	FindString(string) string
-	Parse(TokenParser) error
+	FindString(string) (Token, string)
+	Parse(TokenParser) (Token, error)
 }
 
 // This is a work-around type so Token can Accept a Parser[T]
@@ -17,6 +17,8 @@ type TokenParser interface {
 	CurrentToken() Token
 	Advance() Token
 	AdvanceN(int) Token
+	GetSourceFile() SourceFile
+	Remainder() string
 }
 
 type TokenWithCursorPos[T Token] struct {

@@ -18,25 +18,24 @@ func NewBaseToken(kind BaseTokenKind, value string) BaseToken {
 	}
 }
 
-func (t BaseToken) WithPos(cursorPos int) geno.TokenWithCursorPos[*BaseToken] {
-	return geno.NewTokenWithCursorPos(&t, cursorPos)
+func (t BaseToken) WithPos(cursorPos int) geno.TokenWithCursorPos[BaseToken] {
+	return geno.NewTokenWithCursorPos(t, cursorPos)
 }
 
-// TODO: ...
-func (t *BaseToken) FindString(remainder string) string {
-	return ""
+// TODO: is this correct?
+func (t BaseToken) FindString(s string) (geno.Token, string) {
+	l := NewBaseLexer(s)
+	l.Match() // match once
+	tk := l.PositionedTokens[0].Token
+	return tk, tk.Value
 }
 
-func (t *BaseToken) Parse(tp geno.TokenParser) error {
-	p, ok := any(tp).(geno.Parser[*BaseToken])
+// TODO: is this correct?
+func (t BaseToken) Parse(tp geno.TokenParser) (geno.Token, error) {
+	p, ok := any(tp).(geno.Parser[BaseToken])
 	if !ok {
-		return fmt.Errorf("cannot converting parser type")
+		return nil, fmt.Errorf("cannot converting parser type")
 	}
 
-	// Advance the parser and absorb the token
-	bt := p.Advance()
-	t.Kind = bt.Kind
-	t.Value = bt.Value
-
-	return nil
+	return p.Advance(), nil
 }

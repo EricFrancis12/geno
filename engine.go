@@ -48,14 +48,18 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 					panic("expected *Parser[T] to be convertable to TokenParser")
 				}
 
-				if gt.Parse(tp) != nil {
+				if tk, err := gt.Parse(tp); err != nil {
 					// Reset the parser to the last position + 1 to advance to the next token
 					p.SetPos(posBefore + 1)
 				} else {
 					ctx.FileCursorPos = p.CursorPos()
 					ctx.Pos = p.Pos()
 
-					gt.OnParse(ctx)
+					// Check and run on parse effect if present
+					op, ok := tk.(OnParse[T])
+					if ok {
+						op.OnParse(ctx)
+					}
 				}
 			}
 		}
@@ -68,6 +72,10 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 // TokenLib if needed, along with other regular Tokens
 type GenTrigger[T Token] interface {
 	Token
+	OnParse[T]
+}
+
+type OnParse[T Token] interface {
 	OnParse(*GenContext[T])
 }
 
