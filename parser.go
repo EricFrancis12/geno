@@ -65,3 +65,11 @@ func (p *Parser[T]) GetSourceFile() SourceFile {
 func (p *Parser[T]) Remainder() string {
 	return p.SourceFile.Content[p.CursorPos():]
 }
+
+func (p *Parser[T]) Generalize() TokenParser {
+	tp, ok := any(p).(TokenParser)
+	if !ok {
+		panic("expected *Parser[T] to be convertable to TokenParser")
+	}
+	return tp
+}

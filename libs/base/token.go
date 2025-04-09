@@ -49,15 +49,15 @@ func (t BaseToken) Parse(tp geno.TokenParser) (geno.Token, error) {
 		return nil, fmt.Errorf("cannot parse BaseToken from string (%s)", s)
 	}
 
-	if len(took) == len(s) {
-		return tk, nil
+	if len(took) != len(s) {
+		return nil, fmt.Errorf(
+			"partial match: expected to consume '%s', but only consumed '%s'",
+			s,
+			took,
+		)
 	}
 
-	return nil, fmt.Errorf(
-		"partial match: expected to consume '%s', but only consumed '%s'",
-		s,
-		took,
-	)
+	return tk, nil
 }
 
 func (t BaseToken) String() string {

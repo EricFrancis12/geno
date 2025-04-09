@@ -2,28 +2,28 @@ package geno
 
 type GenEngine[T Token] struct {
 	TokenLib TokenLib[T]
-	Triggers []GenTrigger[T]
+	Triggers []GenTrigger
 }
 
-func NewGenEngine[T Token](tokenLib TokenLib[T], triggers ...GenTrigger[T]) *GenEngine[T] {
+func NewGenEngine[T Token](tokenLib TokenLib[T], triggers ...GenTrigger) *GenEngine[T] {
 	return &GenEngine[T]{
 		TokenLib: tokenLib,
 		Triggers: triggers,
 	}
 }
 
-func (e *GenEngine[T]) AddTrigger(trigger GenTrigger[T]) {
+func (e *GenEngine[T]) AddTrigger(trigger GenTrigger) {
 	e.Triggers = append(e.Triggers, trigger)
 }
 
-func (e *GenEngine[T]) AddTriggers(triggers ...GenTrigger[T]) {
+func (e *GenEngine[T]) AddTriggers(triggers ...GenTrigger) {
 	for _, trigger := range triggers {
 		e.AddTrigger(trigger)
 	}
 }
 
 func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
-	ctx := &GenContext[T]{
+	ctx := &GenContext{
 		WipCodeGen:  []CodeGen{},
 		SourceFiles: sourceFiles,
 	}
@@ -38,15 +38,15 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 			p := NewParser(sf, e.TokenLib)
 
 			// Update context positioned tokens
-			ctx.TokensFromSource = p.TokensFromSource
+			// ctx.TokensFromSource = p.TokensFromSource
+			for _, tfs := range p.TokensFromSource {
+				ctx.TokensFromSource = append(ctx.TokensFromSource, tfs.Generalize())
+			}
 
 			for !p.AtEOF() {
 				posBefore := p.Pos()
 
-				tp, ok := any(p).(TokenParser)
-				if !ok {
-					panic("expected *Parser[T] to be convertable to TokenParser")
-				}
+				tp := p.Generalize()
 
 				if tk, err := gt.Parse(tp); err != nil {
 					// Reset the parser to the last position + 1 to advance to the next token
@@ -56,7 +56,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 					ctx.Pos = p.Pos()
 
 					// Check and run on parse effect if present
-					op, ok := tk.(OnParse[T])
+					op, ok := tk.(OnParse)
 					if ok {
 						op.OnParse(ctx)
 					}
@@ -70,23 +70,23 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 
 // A GenTrigger has a Token embeded so it can be used in a
 // TokenLib if needed, along with other regular Tokens
-type GenTrigger[T Token] interface {
+type GenTrigger interface {
 	Token
-	OnParse[T]
+	OnParse
 }
 
-type OnParse[T Token] interface {
-	OnParse(*GenContext[T])
+type OnParse interface {
+	OnParse(*GenContext)
 }
 
-type GenContext[T Token] struct {
+type GenContext struct {
 	WipCodeGen []CodeGen
 
 	SourceFiles   []SourceFile
 	SourceFilePos int // The index of the source file being parsed
 	FileCursorPos int // The cursor will be directly to the right of the last token parsed when passed into gen()
 
-	TokensFromSource []TokenFromSource[T]
+	TokensFromSource []TokenFromSource[Token]
 	Pos              int // Current position (index) in positionedTokens
 }
 

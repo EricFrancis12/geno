@@ -18,7 +18,7 @@ func (MyGenTrigger) Parse(TokenParser) (Token, error) {
 	return MyGenTrigger{}, nil
 }
 
-func (MyGenTrigger) OnParse(*GenContext[Token]) {
+func (MyGenTrigger) OnParse(*GenContext) {
 	pass = true
 }
 
@@ -32,7 +32,7 @@ func TestEngine(t *testing.T) {
 	tk, err := m.Parse(nil)
 	assert.Nil(t, err)
 
-	op, ok := tk.(OnParse[Token])
+	op, ok := tk.(OnParse)
 	assert.True(t, ok)
 
 	op.OnParse(nil)

@@ -10,7 +10,7 @@ import (
 
 func TestBaseToken(t *testing.T) {
 	type Test struct {
-		code          string
+		source        string
 		expectedToken geno.Token
 		expectedTook  string
 	}
@@ -18,7 +18,7 @@ func TestBaseToken(t *testing.T) {
 	var tests = []Test{
 		// Var
 		{
-			code: "var i = 4;",
+			source: "var i = 4;",
 			expectedToken: BaseToken{
 				Kind:  VAR,
 				Value: "var",
@@ -27,7 +27,7 @@ func TestBaseToken(t *testing.T) {
 		},
 		// Identifier
 		{
-			code: "i = 4;",
+			source: "i = 4;",
 			expectedToken: BaseToken{
 				Kind:  IDENTIFIER,
 				Value: "i",
@@ -36,7 +36,7 @@ func TestBaseToken(t *testing.T) {
 		},
 		// Number
 		{
-			code: "4;",
+			source: "4;",
 			expectedToken: BaseToken{
 				Kind:  NUMBER,
 				Value: "4",
@@ -45,7 +45,7 @@ func TestBaseToken(t *testing.T) {
 		},
 		// String
 		{
-			code: `"my first string" + " my second string"`,
+			source: `"my first string" + " my second string"`,
 			expectedToken: BaseToken{
 				Kind:  STRING,
 				Value: `"my first string"`,
@@ -54,14 +54,14 @@ func TestBaseToken(t *testing.T) {
 		},
 		// Comment
 		{
-			code:          "// This is my comment",
+			source:        "// This is my comment",
 			expectedToken: nil,
 			expectedTook:  "// This is my comment",
 		},
 	}
 
 	for _, test := range tests {
-		tk, took := BaseToken{}.FindString(test.code)
+		tk, took := BaseToken{}.FindString(test.source)
 		assert.Equal(t, test.expectedToken, tk)
 		assert.Equal(t, test.expectedTook, took)
 
