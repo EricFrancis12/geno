@@ -36,11 +36,11 @@ func (b BaseTokenLib) TokenizeWithTraceAddl(source string) []geno.TokenFromSourc
 eofLoop:
 	for !l.AtEOF() {
 		for _, pt := range l.TokensFromSource {
-			twcp, ok := any(pt).(geno.TokenFromSource[geno.Token])
+			tkfc, ok := any(pt).(geno.TokenFromSource[geno.Token])
 			if !ok {
-				panic("TODO")
+				panic("failed to assert type geno.TokenFromSource[geno.Token]")
 			}
-			result = append(result, twcp)
+			result = append(result, tkfc)
 		}
 
 		// Reset slice
