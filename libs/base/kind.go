@@ -4,7 +4,7 @@ type BaseTokenKind int
 
 // TODO: categorize these into groups better
 const (
-	EOF BaseTokenKind = iota
+	UNKNOWN BaseTokenKind = iota
 	NUMBER
 	STRING
 	IDENTIFIER
@@ -112,7 +112,4 @@ const (
 	ANY
 	NEVER
 	VOID
-
-	// Misc
-	UNKNOWN
 )

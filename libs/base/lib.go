@@ -25,7 +25,6 @@ func (b BaseTokenLib) TokenizeWithPos(source string) []geno.TokenWithCursorPos[B
 		l.Match()
 	}
 
-	l.Push(NewBaseToken(EOF, "EOF"))
 	return l.PositionedTokens
 }
 
@@ -48,13 +47,13 @@ eofLoop:
 		l.PositionedTokens = []geno.TokenWithCursorPos[BaseToken]{}
 
 		for _, tk := range b.addlTokens {
-			_tk, match := tk.FindString(l.Remainder())
-			if len(match) > 0 {
+			_tk, took := tk.FindString(l.Remainder())
+			if _tk != nil && len(took) > 0 {
 				result = append(result, geno.TokenWithCursorPos[geno.Token]{
 					Token:     _tk,
 					CursorPos: l.CursorPos,
 				})
-				l.AdvanceN(len(match))
+				l.AdvanceN(len(took))
 				continue eofLoop
 			}
 		}
@@ -62,6 +61,5 @@ eofLoop:
 		l.Match()
 	}
 
-	l.Push(NewBaseToken(EOF, "EOF"))
 	return result
 }

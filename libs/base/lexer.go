@@ -109,7 +109,8 @@ func stringHandler(l *Lexer, regex *regexp.Regexp) {
 	match := regex.FindStringIndex(l.Remainder())
 	stringLiteral := l.Remainder()[match[0]:match[1]]
 
-	l.Push(NewBaseToken(STRING, stringLiteral))
+	quotesRemoved := stringLiteral[1:(len(stringLiteral) - 1)]
+	l.Push(NewBaseToken(STRING, quotesRemoved))
 	l.AdvanceN(len(stringLiteral))
 }
 

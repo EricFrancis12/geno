@@ -25,7 +25,8 @@ func (m MyGenTrigger) OnParse(*GenContext[Token]) {
 func TestEngine(t *testing.T) {
 	m := MyGenTrigger{}
 
-	tk, _ := m.Parse(nil)
+	tk, err := m.Parse(nil)
+	assert.Nil(t, err)
 
 	op, ok := tk.(OnParse[Token])
 	assert.True(t, ok)
