@@ -1,6 +1,7 @@
 package geno
 
 type Token interface {
+	FindString(string) string
 	Parse(TokenParser) error
 }
 

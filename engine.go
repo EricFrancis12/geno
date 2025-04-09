@@ -45,7 +45,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 
 				tp, ok := any(p).(TokenParser)
 				if !ok {
-					panic("TODO: not okay")
+					panic("expected *Parser[T] to be convertable to TokenParser")
 				}
 
 				if gt.Parse(tp) != nil {

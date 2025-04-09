@@ -2,7 +2,13 @@ package base
 
 import "github.com/EricFrancis12/geno"
 
-type BaseTokenLib struct{}
+type BaseTokenLib struct {
+	addlTokens []geno.Token
+}
+
+func (b *BaseTokenLib) AddToken(token geno.Token) {
+	b.addlTokens = append(b.addlTokens, token)
+}
 
 func (b BaseTokenLib) Tokenize(source string) []*BaseToken {
 	baseTokens := []*BaseToken{}
@@ -13,21 +19,21 @@ func (b BaseTokenLib) Tokenize(source string) []*BaseToken {
 }
 
 func (b BaseTokenLib) TokenizeWithPos(source string) []geno.TokenWithCursorPos[*BaseToken] {
-	lex := CreateBaseLexer(source)
+	l := NewBaseLexer(source)
 
 outerLoop:
-	for !lex.AtEOF() {
-		for _, pattern := range lex.Patterns {
-			loc := pattern.Regex.FindStringIndex(lex.Remainder())
+	for !l.AtEOF() {
+		for _, pattern := range l.Patterns {
+			loc := pattern.Regex.FindStringIndex(l.Remainder())
 			if len(loc) != 0 && loc[0] == 0 {
-				pattern.Handler(lex, pattern.Regex)
+				pattern.Handler(l, pattern.Regex)
 				continue outerLoop
 			}
 		}
-		lex.AdvanceN(1)
-		lex.Push(NewBaseToken(UNKNOWN, lex.Remainder()[:1]))
+		l.AdvanceN(1)
+		l.Push(NewBaseToken(UNKNOWN, l.Remainder()[:1]))
 	}
 
-	lex.Push(NewBaseToken(EOF, "EOF"))
-	return lex.PositionedTokens
+	l.Push(NewBaseToken(EOF, "EOF"))
+	return l.PositionedTokens
 }

@@ -37,7 +37,7 @@ func (l *Lexer) AtEOF() bool {
 	return l.CursorPos >= len(l.Source)
 }
 
-func CreateBaseLexer(source string) *Lexer {
+func NewBaseLexer(source string) *Lexer {
 	return &Lexer{
 		CursorPos:        0,
 		Source:           source,
@@ -128,9 +128,7 @@ func commentHandler(l *Lexer, regex *regexp.Regexp) {
 	match := regex.FindStringIndex(l.Remainder())
 	if match != nil {
 		commentLiteral := l.Remainder()[match[0]:match[1]]
-		if strings.HasPrefix(commentLiteral, "//#") || strings.HasPrefix(commentLiteral, "// #") {
-			l.Push(NewBaseToken(COMMENT_DIRECTIVE, commentLiteral))
-
+		if strings.HasPrefix(commentLiteral, "//") {
 			// Advance past the entire comment.
 			l.AdvanceN(match[1])
 		}

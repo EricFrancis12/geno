@@ -22,6 +22,11 @@ func (t BaseToken) WithPos(cursorPos int) geno.TokenWithCursorPos[*BaseToken] {
 	return geno.NewTokenWithCursorPos(&t, cursorPos)
 }
 
+// TODO: ...
+func (t *BaseToken) FindString(remainder string) string {
+	return ""
+}
+
 func (t *BaseToken) Parse(tp geno.TokenParser) error {
 	p, ok := any(tp).(geno.Parser[*BaseToken])
 	if !ok {

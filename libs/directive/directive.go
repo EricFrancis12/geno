@@ -7,6 +7,16 @@ import (
 	"github.com/EricFrancis12/geno/libs/base"
 )
 
+type CommentDirective struct {
+	Directives []Directive
+}
+
+// TODO: ...
+// func (c *CommentDirective) FindString(remainder string) string {}
+
+// TODO: ...
+// func (c *CommentDirective) Parse(tp geno.TokenParser) error {}
+
 type Directive struct {
 	Name   string
 	Params []string

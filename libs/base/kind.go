@@ -114,6 +114,5 @@ const (
 	VOID
 
 	// Misc
-	COMMENT_DIRECTIVE
 	UNKNOWN
 )
