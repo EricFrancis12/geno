@@ -1,5 +1,6 @@
 package geno
 
-type TokenLib interface {
-	Tokenize(string) []PositionedToken
+type TokenLib[T Token] interface {
+	Tokenize(string) []T
+	TokenizeWithPos(string) []TokenWithCursorPos[T]
 }

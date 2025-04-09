@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/EricFrancis12/geno"
+	"github.com/EricFrancis12/geno/libs/base"
 )
 
 type Directive struct {
@@ -29,25 +30,28 @@ func ParseCommentDirectives(s string) ([]Directive, bool) {
 	s = strings.TrimPrefix(s, "//")
 
 	// Create a new parser to parse the remaining comment content: #[foo, bar(baz)]
-	p := geno.NewBaseParser(geno.SourceFile{Content: s})
+	p := base.NewBaseParser(geno.SourceFile{Content: s})
 
-	if _, ok := p.AdvanceBaseTo(geno.HASHTAG, geno.OPEN_BRACKET); !ok {
+	if p.Advance().Kind != base.HASHTAG {
+		return directives, false
+	}
+	if p.Advance().Kind != base.OPEN_BRACKET {
 		return directives, false
 	}
 
-	for p.CurrentBaseToken().Kind != geno.CLOSE_BRACKET {
+	for p.CurrentToken().Kind != base.CLOSE_BRACKET {
 		d := Directive{
-			Name:   p.AdvanceBase().Value,
+			Name:   p.Advance().Value,
 			Params: []string{},
 		}
 
-		if p.CurrentBaseToken().Kind == geno.OPEN_PAREN {
+		if p.CurrentToken().Kind == base.OPEN_PAREN {
 			p.Advance()
 
-			for p.CurrentBaseToken().Kind != geno.CLOSE_PAREN {
-				d.Params = append(d.Params, p.AdvanceBase().Value)
+			for p.CurrentToken().Kind != base.CLOSE_PAREN {
+				d.Params = append(d.Params, p.Advance().Value)
 
-				if p.CurrentBaseToken().Kind == geno.COMMA {
+				if p.CurrentToken().Kind == base.COMMA {
 					p.Advance()
 				}
 			}
@@ -58,7 +62,7 @@ func ParseCommentDirectives(s string) ([]Directive, bool) {
 
 		directives = append(directives, d)
 
-		if p.CurrentBaseToken().Kind == geno.COMMA {
+		if p.CurrentToken().Kind == base.COMMA {
 			p.Advance()
 		}
 	}

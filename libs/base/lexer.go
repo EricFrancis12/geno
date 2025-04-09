@@ -1,67 +1,47 @@
-package geno
+package base
 
 import (
 	"regexp"
 	"strings"
-)
 
-type RegexPattern struct {
-	Regex   *regexp.Regexp
-	Handler regexHandler
-}
+	"github.com/EricFrancis12/geno"
+)
 
 type Lexer struct {
 	Patterns         []RegexPattern
-	PositionedTokens []PositionedToken
+	PositionedTokens []geno.TokenWithCursorPos[*BaseToken]
 	Source           string
 	CursorPos        int
 }
 
-type BaseTokenLib struct{}
-
-func (b BaseTokenLib) Tokenize(source string) []PositionedToken {
-	lex := CreateBaseLexer(source)
-
-outerLoop:
-	for !lex.AtEOF() {
-		for _, pattern := range lex.Patterns {
-			loc := pattern.Regex.FindStringIndex(lex.Remainder())
-			if len(loc) != 0 && loc[0] == 0 {
-				pattern.Handler(lex, pattern.Regex)
-				continue outerLoop
-			}
-		}
-		lex.AdvanceN(1)
-		lex.Push(NewBaseToken(UNKNOWN, lex.Remainder()[:1]))
-	}
-
-	lex.Push(NewBaseToken(EOF, "EOF"))
-	return lex.PositionedTokens
+type RegexPattern struct {
+	Regex   *regexp.Regexp
+	Handler RegexHandler
 }
 
-func (lex *Lexer) AdvanceN(n int) {
-	lex.CursorPos += n
+type RegexHandler func(l *Lexer, regex *regexp.Regexp)
+
+func (l *Lexer) AdvanceN(n int) {
+	l.CursorPos += n
 }
 
-func (lex *Lexer) Remainder() string {
-	return lex.Source[lex.CursorPos:]
+func (l *Lexer) Remainder() string {
+	return l.Source[l.CursorPos:]
 }
 
-func (lex *Lexer) Push(bt BaseToken) {
-	lex.PositionedTokens = append(lex.PositionedTokens, bt.WithPos(lex.CursorPos))
+func (l *Lexer) Push(bt BaseToken) {
+	l.PositionedTokens = append(l.PositionedTokens, bt.WithPos(l.CursorPos))
 }
 
-func (lex *Lexer) AtEOF() bool {
-	return lex.CursorPos >= len(lex.Source)
+func (l *Lexer) AtEOF() bool {
+	return l.CursorPos >= len(l.Source)
 }
-
-type regexHandler func(lex *Lexer, regex *regexp.Regexp)
 
 func CreateBaseLexer(source string) *Lexer {
 	return &Lexer{
 		CursorPos:        0,
 		Source:           source,
-		PositionedTokens: make([]PositionedToken, 0),
+		PositionedTokens: make([]geno.TokenWithCursorPos[*BaseToken], 0),
 		Patterns: []RegexPattern{
 			{regexp.MustCompile(`\s+`), skipHandler},
 			{regexp.MustCompile(`\/\/.*`), commentHandler},
@@ -107,52 +87,52 @@ func CreateBaseLexer(source string) *Lexer {
 
 // Default handler which will simply create a token with the matched contents.
 // This handler is used with most simple tokens.
-func defaultHandler(kind BaseTokenKind, value string) regexHandler {
-	return func(lex *Lexer, _ *regexp.Regexp) {
-		lex.Push(NewBaseToken(kind, value))
-		lex.AdvanceN(len(value))
+func defaultHandler(kind BaseTokenKind, value string) RegexHandler {
+	return func(l *Lexer, _ *regexp.Regexp) {
+		l.Push(NewBaseToken(kind, value))
+		l.AdvanceN(len(value))
 	}
 }
 
-func stringHandler(lex *Lexer, regex *regexp.Regexp) {
-	match := regex.FindStringIndex(lex.Remainder())
-	stringLiteral := lex.Remainder()[match[0]:match[1]]
+func stringHandler(l *Lexer, regex *regexp.Regexp) {
+	match := regex.FindStringIndex(l.Remainder())
+	stringLiteral := l.Remainder()[match[0]:match[1]]
 
-	lex.Push(NewBaseToken(STRING, stringLiteral))
-	lex.AdvanceN(len(stringLiteral))
+	l.Push(NewBaseToken(STRING, stringLiteral))
+	l.AdvanceN(len(stringLiteral))
 }
 
-func numberHandler(lex *Lexer, regex *regexp.Regexp) {
-	match := regex.FindString(lex.Remainder())
-	lex.Push(NewBaseToken(NUMBER, match))
-	lex.AdvanceN(len(match))
+func numberHandler(l *Lexer, regex *regexp.Regexp) {
+	match := regex.FindString(l.Remainder())
+	l.Push(NewBaseToken(NUMBER, match))
+	l.AdvanceN(len(match))
 }
 
-func symbolHandler(lex *Lexer, regex *regexp.Regexp) {
-	match := regex.FindString(lex.Remainder())
+func symbolHandler(l *Lexer, regex *regexp.Regexp) {
+	match := regex.FindString(l.Remainder())
 	t := NewBaseToken(IDENTIFIER, match)
 	if kind, found := reservedTokensLookup[match]; found {
 		t = NewBaseToken(kind, match)
 	}
 
-	lex.Push(t)
-	lex.AdvanceN(len(match))
+	l.Push(t)
+	l.AdvanceN(len(match))
 }
 
-func skipHandler(lex *Lexer, regex *regexp.Regexp) {
-	match := regex.FindStringIndex(lex.Remainder())
-	lex.AdvanceN(match[1])
+func skipHandler(l *Lexer, regex *regexp.Regexp) {
+	match := regex.FindStringIndex(l.Remainder())
+	l.AdvanceN(match[1])
 }
 
-func commentHandler(lex *Lexer, regex *regexp.Regexp) {
-	match := regex.FindStringIndex(lex.Remainder())
+func commentHandler(l *Lexer, regex *regexp.Regexp) {
+	match := regex.FindStringIndex(l.Remainder())
 	if match != nil {
-		commentLiteral := lex.Remainder()[match[0]:match[1]]
+		commentLiteral := l.Remainder()[match[0]:match[1]]
 		if strings.HasPrefix(commentLiteral, "//#") || strings.HasPrefix(commentLiteral, "// #") {
-			lex.Push(NewBaseToken(COMMENT_DIRECTIVE, commentLiteral))
+			l.Push(NewBaseToken(COMMENT_DIRECTIVE, commentLiteral))
 
 			// Advance past the entire comment.
-			lex.AdvanceN(match[1])
+			l.AdvanceN(match[1])
 		}
 	}
 }

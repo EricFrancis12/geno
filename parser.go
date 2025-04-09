@@ -1,97 +1,59 @@
 package geno
 
-type Parser struct {
+type Parser[T Token] struct {
 	SourceFile SourceFile
 
-	PositionedTokens []PositionedToken
-	Pos              int // Current position (index) in positionedTokens
+	PositionedTokens []TokenWithCursorPos[T]
+	Index            int
 }
 
-func NewParser(sourceFile SourceFile, tokenLib TokenLib) *Parser {
-	return &Parser{
+func NewParser[T Token](sourceFile SourceFile, tokenLib TokenLib[T]) *Parser[T] {
+	return &Parser[T]{
 		SourceFile:       sourceFile,
-		PositionedTokens: tokenLib.Tokenize(sourceFile.Content),
+		PositionedTokens: tokenLib.TokenizeWithPos(sourceFile.Content),
 	}
 }
 
-func NewBaseParser(sourceFile SourceFile) *Parser {
-	return &Parser{
-		SourceFile:       sourceFile,
-		PositionedTokens: BaseTokenLib{}.Tokenize(sourceFile.Content),
-	}
+func (p *Parser[T]) AtEOF() bool {
+	return p.Index >= len(p.PositionedTokens)
 }
 
-func (p *Parser) AtEOF() bool {
-	return p.Pos >= len(p.PositionedTokens)
+func (p *Parser[T]) Pos() int {
+	return p.Index
 }
 
-func (p *Parser) GetPos() int {
-	return p.Pos
+func (p *Parser[T]) SetPos(pos int) {
+	p.Index = pos
 }
 
-func (p *Parser) SetPos(pos int) {
-	p.Pos = pos
+func (p *Parser[T]) CursorPos() int {
+	return p.PositionedTokens[p.Index].CursorPos
 }
 
-func (p *Parser) CursorPos() int {
-	return p.PositionedTokens[p.Pos].CursorPos
-}
-
-func (p *Parser) SeekTokenAt(cursorPos int) {
+func (p *Parser[T]) SeekTokenAt(cursorPos int) {
 	p.SetPos(0) // Reset the parser position to the start of the file
 	for p.CursorPos() < cursorPos {
 		p.Advance() // Advance the parser until we reach the desired file cursor position
 	}
 }
 
-func (p *Parser) CurrentToken() Token {
-	return p.PositionedTokens[p.Pos].Token
+func (p *Parser[T]) CurrentToken() T {
+	return p.PositionedTokens[p.Index].Token
 }
 
-func (p *Parser) Advance() Token {
+func (p *Parser[T]) Advance() T {
 	return p.AdvanceN(1)
 }
 
-func (p *Parser) AdvanceN(n int) Token {
+func (p *Parser[T]) AdvanceN(n int) T {
 	tk := p.CurrentToken()
-	newPos := p.Pos + n
+	newIndex := p.Index + n
+
 	// If n is negative, we don't want to go past the start of the token list
-	if newPos < 0 {
-		newPos = 0
+	if newIndex < 0 {
+		newIndex = 0
 	}
-	p.Pos = newPos
-	return tk
-}
+	p.Index = newIndex
 
-func (p *Parser) AdvanceBaseTo(kinds ...BaseTokenKind) (BaseToken, bool) {
-	for _, kind := range kinds {
-		if p.AdvanceBase().Kind != kind {
-			return p.CurrentBaseToken(), false
-		}
-	}
-	return p.CurrentBaseToken(), true
-}
-
-func (p *Parser) CurrentBaseToken() BaseToken {
-	tk, ok := p.CurrentToken().(BaseToken)
-	if !ok {
-		return BaseToken{
-			Kind: UNKNOWN,
-		}
-	}
-	return tk
-}
-
-func (p *Parser) AdvanceBase() BaseToken {
-	return p.AdvanceBaseN(1)
-}
-
-func (p *Parser) AdvanceBaseN(n int) BaseToken {
-	tk, ok := p.AdvanceN(n).(BaseToken)
-	if !ok {
-		return BaseToken{
-			Kind: UNKNOWN,
-		}
-	}
 	return tk
 }
