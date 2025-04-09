@@ -107,10 +107,9 @@ func defaultHandler(kind BaseTokenKind, value string) RegexHandler {
 
 func stringHandler(l *Lexer, regex *regexp.Regexp) {
 	match := regex.FindStringIndex(l.Remainder())
-	stringLiteral := l.Remainder()[match[0]:match[1]]
+	stringLiteral := l.Remainder()[match[0]:match[1]] // surrounding quote chars are included
 
-	quotesRemoved := stringLiteral[1:(len(stringLiteral) - 1)]
-	l.Push(NewBaseToken(STRING, quotesRemoved))
+	l.Push(NewBaseToken(STRING, stringLiteral))
 	l.AdvanceN(len(stringLiteral))
 }
 

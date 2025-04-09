@@ -48,7 +48,7 @@ func TestBaseToken(t *testing.T) {
 			code: `"my first string" + " my second string"`,
 			expectedToken: BaseToken{
 				Kind:  STRING,
-				Value: "my first string",
+				Value: `"my first string"`,
 			},
 			expectedTook: `"my first string"`,
 		},

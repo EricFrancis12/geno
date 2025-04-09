@@ -3,6 +3,7 @@ package geno
 type Token interface {
 	FindString(string) (Token, string)
 	Parse(TokenParser) (Token, error)
+	String() string
 }
 
 // This is a work-around type so Token can Accept a Parser[T]

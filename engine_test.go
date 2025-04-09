@@ -10,16 +10,20 @@ var pass = false
 
 type MyGenTrigger struct{}
 
-func (m MyGenTrigger) FindString(string) (Token, string) {
+func (MyGenTrigger) FindString(string) (Token, string) {
 	return MyGenTrigger{}, ""
 }
 
-func (m MyGenTrigger) Parse(TokenParser) (Token, error) {
+func (MyGenTrigger) Parse(TokenParser) (Token, error) {
 	return MyGenTrigger{}, nil
 }
 
-func (m MyGenTrigger) OnParse(*GenContext[Token]) {
+func (MyGenTrigger) OnParse(*GenContext[Token]) {
 	pass = true
+}
+
+func (MyGenTrigger) String() string {
+	return ""
 }
 
 func TestEngine(t *testing.T) {

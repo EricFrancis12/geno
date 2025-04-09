@@ -24,12 +24,13 @@ func (t BaseToken) WithPos(cursorPos int) geno.TokenFromSource[BaseToken] {
 
 func (t BaseToken) FindString(s string) (geno.Token, string) {
 	l := NewBaseLexer(s)
+
 	startLen := len(l.Remainder())
-
 	l.Match() // match once
-
 	endLen := len(l.Remainder())
+
 	diff := startLen - endLen
+	took := l.Source[:diff]
 
 	var tk geno.Token
 	// Check if the lexer matched a token
@@ -37,15 +38,28 @@ func (t BaseToken) FindString(s string) (geno.Token, string) {
 		tk = l.TokensFromSource[0].Token
 	}
 
-	return tk, l.Source[:diff]
+	return tk, took
 }
 
-// TODO: is this correct?
 func (t BaseToken) Parse(tp geno.TokenParser) (geno.Token, error) {
-	p, ok := any(tp).(geno.Parser[BaseToken])
-	if !ok {
-		return nil, fmt.Errorf("cannot convert parser type")
+	s := tp.Advance().String()
+
+	tk, took := t.FindString(s)
+	if tk == nil {
+		return nil, fmt.Errorf("cannot parse BaseToken from string (%s)", s)
 	}
 
-	return p.Advance(), nil
+	if len(took) == len(s) {
+		return tk, nil
+	}
+
+	return nil, fmt.Errorf(
+		"partial match: expected to consume '%s', but only consumed '%s'",
+		s,
+		took,
+	)
+}
+
+func (t BaseToken) String() string {
+	return t.Value
 }
