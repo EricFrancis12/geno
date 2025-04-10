@@ -73,9 +73,15 @@ func (p *Parser[T]) Remainder() string {
 }
 
 func (p *Parser[T]) Parse(token Token) (Token, error) {
-	tk, took := token.FindString(p.Remainder())
+	rem := p.Remainder()
+
+	tk, took := token.FindString(rem)
 	if tk == nil {
-		return nil, fmt.Errorf("cannot parse CommentDirective")
+		return nil, fmt.Errorf(
+			"token '%s' did not match near '%s'",
+			token.String(),
+			utils.AddSuffixIfLength(rem, 20, "..."),
+		)
 	}
 
 	wip := ""
