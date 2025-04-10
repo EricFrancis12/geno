@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEngine(t *testing.T) {
+func TestDirectiveEngine(t *testing.T) {
 	pass := false
 
 	e := directive.NewEngine(
-		directive.NewCommentDirective(
+		directive.OnCommentDirective(
 			func(ctx *geno.GenContext) {
 				cg := geno.CodeGen{
 					Code:       "hello",

@@ -1,6 +1,11 @@
 package geno
 
-import "github.com/EricFrancis12/geno/utils"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/EricFrancis12/geno/utils"
+)
 
 type Parser[T Token] struct {
 	SourceFile SourceFile
@@ -67,24 +72,27 @@ func (p *Parser[T]) Remainder() string {
 	return p.SourceFile.Content[p.CursorPos():]
 }
 
-type tokenUsableParser[T Token] struct {
-	*Parser[T]
-}
-
-func (t tokenUsableParser[T]) CurrentToken() Token {
-	return t.Parser.CurrentToken()
-}
-
-func (t tokenUsableParser[T]) Advance() Token {
-	return t.Parser.Advance()
-}
-
-func (t tokenUsableParser[T]) AdvanceN(n int) Token {
-	return t.Parser.AdvanceN(n)
-}
-
-func (p *Parser[T]) ToTokenUsable() TokenParser {
-	return tokenUsableParser[T]{
-		Parser: p,
+func (p *Parser[T]) Parse(token Token) (Token, error) {
+	tk, took := token.FindString(p.Remainder())
+	if tk == nil {
+		return nil, fmt.Errorf("cannot parse CommentDirective")
 	}
+
+	wip := ""
+
+	for !p.AtEOF() {
+		wip += p.Advance().String()
+
+		if wip == took {
+			return tk, nil
+		} else if !strings.HasPrefix(took, wip) {
+			return nil, fmt.Errorf(
+				"expected '%s', to have prefix '%s'",
+				took,
+				wip,
+			)
+		}
+	}
+
+	return nil, fmt.Errorf("eof")
 }

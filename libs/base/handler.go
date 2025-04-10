@@ -1,12 +1,9 @@
-package handler
+package base
 
-import (
-	"github.com/EricFrancis12/geno"
-	"github.com/EricFrancis12/geno/libs/base"
-)
+import "github.com/EricFrancis12/geno"
 
 type BaseHandlerToken struct {
-	base.BaseToken
+	BaseToken
 	ParseHandlers []geno.ParseHandler
 }
 

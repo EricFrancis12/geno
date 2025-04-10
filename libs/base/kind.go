@@ -2,9 +2,11 @@ package base
 
 type BaseTokenKind int
 
-// TODO: categorize these into groups better
 const (
+	// Unknown (default) kind
 	UNKNOWN BaseTokenKind = iota
+
+	// Literals
 	NUMBER
 	STRING
 	IDENTIFIER
@@ -17,44 +19,44 @@ const (
 	OPEN_PAREN
 	CLOSE_PAREN
 
-	// Equivalence
-	ASSIGNMENT
-	EQUALS
-	NOT_EQUALS
-	NOT
+	// Assignment & Comparison Operators
+	ASSIGNMENT // =
+	EQUALS     // ==
+	NOT_EQUALS // !=
+	NOT        // !
 
-	// Conditional
-	LESS
-	LESS_EQUALS
-	GREATER
-	GREATER_EQUALS
+	// Relational Operators
+	LESS           // <
+	LESS_EQUALS    // <=
+	GREATER        // >
+	GREATER_EQUALS // >=
 
-	// Logical
-	OR
-	AND
+	// Logical Operators
+	OR  // ||
+	AND // &&
 
-	// Symbols
-	DOT
-	DOT_DOT
-	SEMI_COLON
-	COLON
-	QUESTION
-	COMMA
-	HASHTAG
+	// Symbols & Punctuation
+	DOT        // .
+	DOT_DOT    // ..
+	SEMI_COLON // ;
+	COLON      // :
+	QUESTION   // ?
+	COMMA      // ,
+	HASHTAG    // #
 
-	// Shorthand
-	PLUS_PLUS
-	MINUS_MINUS
-	PLUS_EQUALS
-	MINUS_EQUALS
+	// Increment/Decrement & Compound Assignment
+	PLUS_PLUS          // ++
+	MINUS_MINUS        // --
+	PLUS_EQUALS        // +=
+	MINUS_EQUALS       // -=
 	NULLISH_ASSIGNMENT // ??=
 
-	// Maths
-	PLUS
-	DASH
-	SLASH
-	STAR
-	PERCENT
+	// Arithmetic Operators
+	PLUS    // +
+	DASH    // -
+	SLASH   // /
+	STAR    // *
+	PERCENT // %
 
 	// Reserved Keywords
 	NULL
@@ -94,6 +96,8 @@ const (
 	SWITCH
 	CASE
 	DEFAULT
+
+	// Advanced/Modern Keywords
 	ABSTRACT
 	ASYNC
 	AWAIT

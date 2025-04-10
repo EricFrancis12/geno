@@ -46,7 +46,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 			for !p.AtEOF() {
 				posBefore := p.Pos()
 
-				if _, err := gt.Parse(p.ToTokenUsable()); err != nil {
+				if _, err := p.Parse(gt); err != nil {
 					// Reset the parser to the last position + 1 to advance to the next token
 					p.SetPos(posBefore + 1)
 				} else {
@@ -77,7 +77,7 @@ type GenContext struct {
 	Pos              int // Current position (index) in positionedTokens
 }
 
-// TODO: add .Authors and .OrigAuthor to track the SourceFile that created this
+// TODO: Add Authors and OrigAuthor props to track which SourceFile created this
 type CodeGen struct {
 	Code       string
 	OutputPath string

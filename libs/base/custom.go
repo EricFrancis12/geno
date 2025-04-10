@@ -1,9 +1,6 @@
-package custom
+package base
 
-import (
-	"github.com/EricFrancis12/geno"
-	"github.com/EricFrancis12/geno/libs/base"
-)
+import "github.com/EricFrancis12/geno"
 
 type CustomBaseTokenLib struct {
 	addlTokens []geno.Token
@@ -24,7 +21,7 @@ func (b CustomBaseTokenLib) Tokenize(source string) []geno.Token {
 func (b CustomBaseTokenLib) TokenizeWithTrace(source string) []geno.TokenFromSource[geno.Token] {
 	result := []geno.TokenFromSource[geno.Token]{}
 
-	l := base.NewBaseLexer(source)
+	l := NewBaseLexer(source)
 
 eofLoop:
 	for !l.AtEOF() {
@@ -33,7 +30,7 @@ eofLoop:
 		}
 
 		// Reset slice
-		l.TokensFromSource = []geno.TokenFromSource[base.BaseToken]{}
+		l.TokensFromSource = []geno.TokenFromSource[BaseToken]{}
 
 		for _, tk := range b.addlTokens {
 			_tk, took := tk.FindString(l.Remainder())

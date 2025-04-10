@@ -1,7 +1,6 @@
 package directive
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/EricFrancis12/geno"
@@ -15,7 +14,7 @@ type CommentDirective struct {
 	parseHandlers []geno.ParseHandler
 }
 
-func NewCommentDirective(parseHandlers ...geno.ParseHandler) CommentDirective {
+func OnCommentDirective(parseHandlers ...geno.ParseHandler) CommentDirective {
 	return CommentDirective{
 		directives:    []Directive{},
 		parseHandlers: parseHandlers,
@@ -84,34 +83,6 @@ func (c CommentDirective) FindString(s string) (geno.Token, string) {
 		value:      took,
 		directives: directives,
 	}, took
-}
-
-// TODO: combine this logic with BaseToken{}.Parse() (via tp.Parse() using StringFinder interface?)
-func (c CommentDirective) Parse(tp geno.TokenParser) (geno.Token, error) {
-	rem := tp.Remainder()
-
-	tk, took := c.FindString(rem)
-	if tk == nil {
-		return nil, fmt.Errorf("cannot parse CommentDirective")
-	}
-
-	wip := ""
-
-	for !tp.AtEOF() {
-		wip += tp.Advance().String()
-
-		if wip == took {
-			return tk, nil
-		} else if !strings.HasPrefix(took, wip) {
-			return nil, fmt.Errorf(
-				"expected '%s', to have prefix '%s'",
-				took,
-				wip,
-			)
-		}
-	}
-
-	return nil, fmt.Errorf("eof")
 }
 
 func (c CommentDirective) OnParse(ctx *geno.GenContext) {
