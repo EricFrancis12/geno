@@ -80,8 +80,9 @@ func (c CommentDirective) FindString(s string) (geno.Token, string) {
 	took := s[:diff+1]
 
 	return CommentDirective{
-		Value:      took,
-		Directives: directives,
+		Value:         took,
+		Directives:    directives,
+		parseHandlers: c.parseHandlers,
 	}, took
 }
 

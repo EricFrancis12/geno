@@ -46,7 +46,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 			for !p.AtEOF() {
 				posBefore := p.Pos()
 
-				if _, err := p.Parse(gt); err != nil {
+				if tk, err := p.Parse(gt); err != nil {
 					// Reset the parser to the last position + 1 to advance to the next token
 					p.SetPos(posBefore + 1)
 				} else {
@@ -54,7 +54,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 					ctx.Pos = p.Pos()
 
 					// Check and run on parse effect if present
-					op, ok := gt.(OnParse)
+					op, ok := tk.(OnParse)
 					if ok {
 						op.OnParse(ctx)
 					}
