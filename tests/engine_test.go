@@ -4,17 +4,24 @@ import (
 	"testing"
 
 	"github.com/EricFrancis12/geno"
-	"github.com/EricFrancis12/geno/libs/base/custom"
-	"github.com/EricFrancis12/geno/libs/directive"
+	"github.com/EricFrancis12/geno/libs/base/directive"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEngine(t *testing.T) {
-	lib := custom.BaseTokenLib{}
-	lib.AddToken(directive.CommentDirective{})
+	pass := false
 
-	e := geno.NewGenEngine(
-		lib,
-		directive.CommentDirective{},
+	e := directive.NewEngine(
+		directive.NewCommentDirective(
+			func(ctx *geno.GenContext) {
+				cg := geno.CodeGen{
+					Code:       "hello",
+					OutputPath: "./my/dir/file.txt",
+				}
+				ctx.WipCodeGen = append(ctx.WipCodeGen, cg)
+				pass = true
+			},
+		),
 	)
 
 	sf := geno.SourceFile{
@@ -28,5 +35,12 @@ func TestEngine(t *testing.T) {
 		`,
 	}
 
-	e.Gen(sf)
+	cgs := e.Gen(sf)
+
+	assert.Equal(
+		t,
+		[]geno.CodeGen{{Code: "hello", OutputPath: "./my/dir/file.txt"}},
+		cgs,
+	)
+	assert.True(t, pass)
 }

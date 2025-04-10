@@ -19,123 +19,123 @@ func TestCommentDirectivesToken(t *testing.T) {
 		{
 			source: `//#[]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{},
-				Value:      `//#[]`,
+				directives: []Directive{},
+				value:      `//#[]`,
 			},
 			expectedTook: `//#[]`,
 		},
 		{
 			source: `// #[]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{},
-				Value:      `// #[]`,
+				directives: []Directive{},
+				value:      `// #[]`,
 			},
 			expectedTook: `// #[]`,
 		},
 		{
 			source: `// #[foo]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{}},
 				},
-				Value: `// #[foo]`,
+				value: `// #[foo]`,
 			},
 			expectedTook: `// #[foo]`,
 		},
 		{
 			source: `// #[foo()]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{}},
 				},
-				Value: `// #[foo()]`,
+				value: `// #[foo()]`,
 			},
 			expectedTook: `// #[foo()]`,
 		},
 		{
 			source: `// #[foo(bar)]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{"bar"}},
 				},
-				Value: `// #[foo(bar)]`,
+				value: `// #[foo(bar)]`,
 			},
 			expectedTook: `// #[foo(bar)]`,
 		},
 		{
 			source: `// #[foo(bar), baz]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{"bar"}},
 					{Name: "baz", Params: []string{}},
 				},
-				Value: `// #[foo(bar), baz]`,
+				value: `// #[foo(bar), baz]`,
 			},
 			expectedTook: `// #[foo(bar), baz]`,
 		},
 		{
 			source: `// #[baz, foo(bar)]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "baz", Params: []string{}},
 					{Name: "foo", Params: []string{"bar"}},
 				},
-				Value: `// #[baz, foo(bar)]`,
+				value: `// #[baz, foo(bar)]`,
 			},
 			expectedTook: `// #[baz, foo(bar)]`,
 		},
 		{
 			source: `// #[foo(bar, baz)]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{"bar", "baz"}},
 				},
-				Value: `// #[foo(bar, baz)]`,
+				value: `// #[foo(bar, baz)]`,
 			},
 			expectedTook: `// #[foo(bar, baz)]`,
 		},
 		{
 			source: `// #[foo(bar, baz), qux]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{"bar", "baz"}},
 					{Name: "qux", Params: []string{}},
 				},
-				Value: `// #[foo(bar, baz), qux]`,
+				value: `// #[foo(bar, baz), qux]`,
 			},
 			expectedTook: `// #[foo(bar, baz), qux]`,
 		},
 		{
 			source: `// #[foo(bar, baz), qux()]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{"bar", "baz"}},
 					{Name: "qux", Params: []string{}},
 				},
-				Value: `// #[foo(bar, baz), qux()]`,
+				value: `// #[foo(bar, baz), qux()]`,
 			},
 			expectedTook: `// #[foo(bar, baz), qux()]`,
 		},
 		{
 			source: `// #[foo(bar, baz), qux(quux)]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "foo", Params: []string{"bar", "baz"}},
 					{Name: "qux", Params: []string{"quux"}},
 				},
-				Value: `// #[foo(bar, baz), qux(quux)]`,
+				value: `// #[foo(bar, baz), qux(quux)]`,
 			},
 			expectedTook: `// #[foo(bar, baz), qux(quux)]`,
 		},
 		{
 			source: `// #[hello, foo(bar, baz), qux(quux)]`,
 			expectedToken: CommentDirective{
-				Directives: []Directive{
+				directives: []Directive{
 					{Name: "hello", Params: []string{}},
 					{Name: "foo", Params: []string{"bar", "baz"}},
 					{Name: "qux", Params: []string{"quux"}},
 				},
-				Value: `// #[hello, foo(bar, baz), qux(quux)]`,
+				value: `// #[hello, foo(bar, baz), qux(quux)]`,
 			},
 			expectedTook: `// #[hello, foo(bar, baz), qux(quux)]`,
 		},

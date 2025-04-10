@@ -10,3 +10,5 @@ type GenTrigger interface {
 type OnParse interface {
 	OnParse(*GenContext)
 }
+
+type ParseHandler = func(ctx *GenContext)

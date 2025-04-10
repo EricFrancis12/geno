@@ -5,15 +5,15 @@ import (
 	"github.com/EricFrancis12/geno/libs/base"
 )
 
-type BaseTokenLib struct {
+type CustomBaseTokenLib struct {
 	addlTokens []geno.Token
 }
 
-func (b *BaseTokenLib) AddToken(token geno.Token) {
+func (b *CustomBaseTokenLib) AddToken(token geno.Token) {
 	b.addlTokens = append(b.addlTokens, token)
 }
 
-func (b BaseTokenLib) Tokenize(source string) []geno.Token {
+func (b CustomBaseTokenLib) Tokenize(source string) []geno.Token {
 	tokens := []geno.Token{}
 	for _, twp := range b.TokenizeWithTrace(source) {
 		tokens = append(tokens, twp.Token)
@@ -21,7 +21,7 @@ func (b BaseTokenLib) Tokenize(source string) []geno.Token {
 	return tokens
 }
 
-func (b BaseTokenLib) TokenizeWithTrace(source string) []geno.TokenFromSource[geno.Token] {
+func (b CustomBaseTokenLib) TokenizeWithTrace(source string) []geno.TokenFromSource[geno.Token] {
 	result := []geno.TokenFromSource[geno.Token]{}
 
 	l := base.NewBaseLexer(source)

@@ -10,8 +10,16 @@ import (
 
 // CommentDirective satisfies the Token interface
 type CommentDirective struct {
-	Directives []Directive
-	Value      string // The original string that the Directive was parsed from
+	directives    []Directive
+	value         string // The original string that the Directive was parsed from
+	parseHandlers []geno.ParseHandler
+}
+
+func NewCommentDirective(parseHandlers ...geno.ParseHandler) CommentDirective {
+	return CommentDirective{
+		directives:    []Directive{},
+		parseHandlers: parseHandlers,
+	}
 }
 
 // This function extracts Directives from comments that use the following format:
@@ -73,8 +81,8 @@ func (c CommentDirective) FindString(s string) (geno.Token, string) {
 	took := s[:diff+1]
 
 	return CommentDirective{
-		Value:      took,
-		Directives: directives,
+		value:      took,
+		directives: directives,
 	}, took
 }
 
@@ -107,11 +115,15 @@ func (c CommentDirective) Parse(tp geno.TokenParser) (geno.Token, error) {
 }
 
 func (c CommentDirective) OnParse(ctx *geno.GenContext) {
-	fmt.Println("TODO: CommentDirective{}.OnParse()")
+	for _, ph := range c.parseHandlers {
+		if ph != nil {
+			ph(ctx)
+		}
+	}
 }
 
 func (c CommentDirective) String() string {
-	return c.Value
+	return c.value
 }
 
 type Directive struct {
