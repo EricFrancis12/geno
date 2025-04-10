@@ -22,7 +22,7 @@ func (e *GenEngine[T]) AddTriggers(triggers ...GenTrigger) {
 	}
 }
 
-func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
+func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 	ctx := &GenContext{
 		WipCodeGen:  []CodeGen{},
 		SourceFiles: sourceFiles,
@@ -63,7 +63,14 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 		}
 	}
 
-	return ctx.WipCodeGen
+	return GenResult{
+		CodeGens: ctx.WipCodeGen,
+	}
+}
+
+type SourceFile struct {
+	Name    string
+	Content string
 }
 
 type GenContext struct {
@@ -83,7 +90,15 @@ type CodeGen struct {
 	OutputPath string
 }
 
-type SourceFile struct {
-	Name    string
-	Content string
+type GenResult struct {
+	CodeGens []CodeGen
+}
+
+func (g GenResult) Join(sep string) string {
+	s := ""
+	for _, cg := range g.CodeGens {
+		s += cg.Code
+		s += sep
+	}
+	return s
 }

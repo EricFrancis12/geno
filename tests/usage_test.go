@@ -35,12 +35,12 @@ func TestDirectiveEngine(t *testing.T) {
 		`,
 	}
 
-	cgs := e.Gen(sf)
+	result := e.Gen(sf)
 
 	assert.Equal(
 		t,
 		[]geno.CodeGen{{Code: "hello", OutputPath: "./my/dir/file.txt"}},
-		cgs,
+		result.CodeGens,
 	)
 	assert.True(t, pass)
 }
