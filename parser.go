@@ -1,5 +1,7 @@
 package geno
 
+import "github.com/EricFrancis12/geno/utils"
+
 type Parser[T Token] struct {
 	SourceFile SourceFile
 
@@ -47,13 +49,12 @@ func (p *Parser[T]) Advance() T {
 
 func (p *Parser[T]) AdvanceN(n int) T {
 	tk := p.CurrentToken()
-	newIndex := p.Index + n
 
-	// If n is negative, we don't want to go past the start of the token list
-	if newIndex < 0 {
-		newIndex = 0
-	}
-	p.Index = newIndex
+	p.Index = utils.Clamp(
+		p.Index+n,
+		0,
+		len(p.TokensFromSource)-1,
+	)
 
 	return tk
 }
@@ -66,10 +67,24 @@ func (p *Parser[T]) Remainder() string {
 	return p.SourceFile.Content[p.CursorPos():]
 }
 
-func (p *Parser[T]) Generalize() TokenParser {
-	tp, ok := any(p).(TokenParser)
-	if !ok {
-		panic("expected *Parser[T] to be convertable to TokenParser")
+type tokenUsableParser[T Token] struct {
+	*Parser[T]
+}
+
+func (t tokenUsableParser[T]) CurrentToken() Token {
+	return t.Parser.CurrentToken()
+}
+
+func (t tokenUsableParser[T]) Advance() Token {
+	return t.Parser.Advance()
+}
+
+func (t tokenUsableParser[T]) AdvanceN(n int) Token {
+	return t.Parser.AdvanceN(n)
+}
+
+func (p *Parser[T]) ToTokenUsable() TokenParser {
+	return tokenUsableParser[T]{
+		Parser: p,
 	}
-	return tp
 }

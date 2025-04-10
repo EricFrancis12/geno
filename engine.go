@@ -46,9 +46,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 			for !p.AtEOF() {
 				posBefore := p.Pos()
 
-				tp := p.Generalize()
-
-				if tk, err := gt.Parse(tp); err != nil {
+				if tk, err := gt.Parse(p.ToTokenUsable()); err != nil {
 					// Reset the parser to the last position + 1 to advance to the next token
 					p.SetPos(posBefore + 1)
 				} else {
@@ -66,17 +64,6 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) []CodeGen {
 	}
 
 	return ctx.WipCodeGen
-}
-
-// A GenTrigger has a Token embeded so it can be used in a
-// TokenLib if needed, along with other regular Tokens
-type GenTrigger interface {
-	Token
-	OnParse
-}
-
-type OnParse interface {
-	OnParse(*GenContext)
 }
 
 type GenContext struct {

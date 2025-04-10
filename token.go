@@ -35,9 +35,12 @@ func NewTokenFromSource[T Token](t T, cursorPos int) TokenFromSource[T] {
 }
 
 func (tfs TokenFromSource[T]) Generalize() TokenFromSource[Token] {
-	_tfs, ok := any(tfs).(TokenFromSource[Token])
+	tk, ok := any(tfs.Token).(Token)
 	if !ok {
-		panic("failed to assert type TokenFromSource[Token]")
+		panic("failed to assert type Token")
 	}
-	return _tfs
+	return TokenFromSource[Token]{
+		Token:     tk,
+		CursorPos: tfs.CursorPos,
+	}
 }

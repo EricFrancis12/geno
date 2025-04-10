@@ -147,9 +147,9 @@ func TestCommentDirectivesToken(t *testing.T) {
 		assert.Equal(t, test.expectedTook, took)
 
 		if tk != nil {
-			btk, ok := tk.(CommentDirective)
+			cd, ok := tk.(CommentDirective)
 			assert.True(t, ok)
-			assert.Equal(t, test.expectedToken, btk)
+			assert.Equal(t, test.expectedToken, cd)
 		}
 	}
 }

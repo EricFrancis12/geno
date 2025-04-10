@@ -14,20 +14,25 @@ type CommentDirective struct {
 	Value      string // The original string that the Directive was parsed from
 }
 
+// This function extracts Directives from comments that use the following format:
+// // #[foo, bar(baz)]
+//
+// The comment above would create 2 directives:
+// 1. Directive{Name: "foo", Params: []string{}}
+// 2. Directive{Name: "bar", Params: []string{"baz"}}
 func (c CommentDirective) FindString(s string) (geno.Token, string) {
 	directives := []Directive{}
-	value := s
 
-	s = strings.TrimSpace(s)
-	if !strings.HasPrefix(s, "//#") && !strings.HasPrefix(s, "// #") {
+	content := strings.TrimSpace(s)
+	if !strings.HasPrefix(content, "//#") && !strings.HasPrefix(content, "// #") {
 		return nil, ""
 	}
 
 	// Remove the comment prefix
-	s = strings.TrimPrefix(s, "//")
+	content = strings.TrimPrefix(content, "//")
 
 	// Create a new parser to parse the remaining comment content: #[foo, bar(baz)]
-	p := base.NewBaseParser(geno.SourceFile{Content: s})
+	p := base.NewBaseParser(geno.SourceFile{Content: content})
 
 	if p.Advance().Kind != base.HASHTAG {
 		return nil, ""
@@ -64,39 +69,45 @@ func (c CommentDirective) FindString(s string) (geno.Token, string) {
 		}
 	}
 
+	diff := len(s) - len(p.Remainder())
+	took := s[:diff+1]
+
 	return CommentDirective{
-		Value:      value,
+		Value:      took,
 		Directives: directives,
-	}, value
+	}, took
 }
 
-// This function extracts Directives from comments that use the following format:
-// // #[foo, bar(baz)]
-//
-// This comment would create 2 directives:
-// 1. Directive{Name: "foo", Params: []string{}}
-// 2. Directive{Name: "bar", Params: []string{"baz"}}
+// TODO: combine this logic with BaseToken{}.Parse() (via tp.Parse() using StringFinder interface?)
 func (c CommentDirective) Parse(tp geno.TokenParser) (geno.Token, error) {
-	s := tp.Advance().String()
+	rem := tp.Remainder()
 
-	tk, took := c.FindString(s)
+	tk, took := c.FindString(rem)
 	if tk == nil {
-		return nil, fmt.Errorf("cannot parse CommentDirective from string (%s)", s)
+		return nil, fmt.Errorf("cannot parse CommentDirective")
 	}
 
-	if len(took) != len(s) {
-		return nil, fmt.Errorf(
-			"partial match: expected to consume '%s', but only consumed '%s'",
-			s,
-			took,
-		)
+	wip := ""
+
+	for !tp.AtEOF() {
+		wip += tp.Advance().String()
+
+		if wip == took {
+			return tk, nil
+		} else if !strings.HasPrefix(took, wip) {
+			return nil, fmt.Errorf(
+				"expected '%s', to have prefix '%s'",
+				took,
+				wip,
+			)
+		}
 	}
 
-	return tk, nil
+	return nil, fmt.Errorf("eof")
 }
 
 func (c CommentDirective) OnParse(ctx *geno.GenContext) {
-
+	fmt.Println("TODO: CommentDirective{}.OnParse()")
 }
 
 func (c CommentDirective) String() string {
