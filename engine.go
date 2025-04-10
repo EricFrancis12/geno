@@ -38,7 +38,6 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 			p := NewParser(sf, e.TokenLib)
 
 			// Update context positioned tokens
-			// ctx.TokensFromSource = p.TokensFromSource
 			for _, tfs := range p.TokensFromSource {
 				ctx.TokensFromSource = append(ctx.TokensFromSource, tfs.Generalize())
 			}
