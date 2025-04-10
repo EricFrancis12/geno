@@ -9,14 +9,14 @@ import (
 
 // CommentDirective satisfies the Token interface
 type CommentDirective struct {
-	directives    []Directive
-	value         string // The original string that the Directive was parsed from
+	Directives    []Directive
+	Value         string // The original string that the Directive was parsed from
 	parseHandlers []geno.ParseHandler
 }
 
 func OnCommentDirective(parseHandlers ...geno.ParseHandler) CommentDirective {
 	return CommentDirective{
-		directives:    []Directive{},
+		Directives:    []Directive{},
 		parseHandlers: parseHandlers,
 	}
 }
@@ -80,8 +80,8 @@ func (c CommentDirective) FindString(s string) (geno.Token, string) {
 	took := s[:diff+1]
 
 	return CommentDirective{
-		value:      took,
-		directives: directives,
+		Value:      took,
+		Directives: directives,
 	}, took
 }
 
@@ -94,7 +94,7 @@ func (c CommentDirective) OnParse(ctx *geno.GenContext) {
 }
 
 func (c CommentDirective) String() string {
-	return c.value
+	return c.Value
 }
 
 type Directive struct {
