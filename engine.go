@@ -31,13 +31,11 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 	for i, sf := range sourceFiles {
 		ctx.SourceFilePos = i
 
-		// Copy triggers, because they are to be mutated on successful .Parse()
-		triggers := e.Triggers
-
-		for _, gt := range triggers {
+		for _, gt := range e.Triggers {
 			p := NewParser(sf, e.TokenLib)
 
 			// Update context positioned tokens
+			ctx.TokensFromSource = []TokenFromSource[Token]{}
 			for _, tfs := range p.TokensFromSource {
 				ctx.TokensFromSource = append(ctx.TokensFromSource, tfs.Generalize())
 			}
@@ -49,12 +47,13 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 					// Reset the parser to the last position + 1 to advance to the next token
 					p.SetPos(posBefore + 1)
 				} else {
-					ctx.FileCursorPos = p.CursorPos()
-					ctx.Pos = p.Pos()
-
 					// Check and run on parse effect if present
 					op, ok := tk.(OnParse)
 					if ok {
+						// Update context before passing in
+						ctx.FileCursorPos = p.CursorPos()
+						ctx.Pos = p.Pos()
+
 						op.OnParse(ctx)
 					}
 				}
