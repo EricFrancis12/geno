@@ -40,7 +40,7 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 				ctx.TokensFromSource = append(ctx.TokensFromSource, tfs.Generalize())
 			}
 
-			for !p.AtEOF() {
+			for {
 				posBefore := p.Pos()
 
 				if tk, err := p.Parse(gt); err != nil {
@@ -56,6 +56,10 @@ func (e GenEngine[T]) Gen(sourceFiles ...SourceFile) GenResult {
 
 						op.OnParse(ctx)
 					}
+				}
+
+				if p.AtEOF() {
+					break
 				}
 			}
 		}

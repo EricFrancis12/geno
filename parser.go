@@ -22,7 +22,7 @@ func NewParser[T Token](sourceFile SourceFile, tokenLib TokenLib[T]) *Parser[T] 
 }
 
 func (p *Parser[T]) AtEOF() bool {
-	return p.Index >= len(p.TokensFromSource)
+	return p.Index >= (len(p.TokensFromSource) - 1)
 }
 
 func (p *Parser[T]) Pos() int {
@@ -30,10 +30,17 @@ func (p *Parser[T]) Pos() int {
 }
 
 func (p *Parser[T]) SetPos(pos int) {
-	p.Index = pos
+	p.Index = utils.Clamp(
+		pos,
+		0,
+		len(p.TokensFromSource)-1,
+	)
 }
 
 func (p *Parser[T]) CursorPos() int {
+	if len(p.TokensFromSource) == 0 {
+		return 0
+	}
 	return p.TokensFromSource[p.Index].CursorPos
 }
 
@@ -45,6 +52,10 @@ func (p *Parser[T]) SeekTokenAt(cursorPos int) {
 }
 
 func (p *Parser[T]) CurrentToken() T {
+	if len(p.TokensFromSource) == 0 {
+		var t T
+		return t
+	}
 	return p.TokensFromSource[p.Index].Token
 }
 
@@ -86,10 +97,10 @@ func (p *Parser[T]) Parse(token Token) (Token, error) {
 
 	wip := ""
 
-	for !p.AtEOF() {
+	for {
 		wip += p.Advance().String()
 
-		if wip == took {
+		if wip != "" && wip == took {
 			return tk, nil
 		} else if !strings.HasPrefix(took, wip) {
 			return nil, fmt.Errorf(
@@ -97,6 +108,10 @@ func (p *Parser[T]) Parse(token Token) (Token, error) {
 				took,
 				wip,
 			)
+		}
+
+		if p.AtEOF() {
+			break
 		}
 	}
 
