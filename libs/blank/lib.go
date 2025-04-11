@@ -6,11 +6,11 @@ import (
 )
 
 type BlankTokenLib struct {
-	addlTokens []geno.Token
+	Tokens []geno.Token
 }
 
 func (b *BlankTokenLib) AddToken(token geno.Token) {
-	b.addlTokens = append(b.addlTokens, token)
+	b.Tokens = append(b.Tokens, token)
 }
 
 func (b BlankTokenLib) Tokenize(source string) []geno.Token {
@@ -26,8 +26,9 @@ func (b BlankTokenLib) TokenizeWithTrace(source string) []geno.TokenFromSource[g
 
 	l := base.NewBaseLexer(source)
 
+eofLoop:
 	for !l.AtEOF() {
-		for _, tk := range b.addlTokens {
+		for _, tk := range b.Tokens {
 			_tk, took := tk.FindString(l.Remainder())
 			if _tk != nil && len(took) > 0 {
 				result = append(result, geno.TokenFromSource[geno.Token]{
@@ -35,9 +36,11 @@ func (b BlankTokenLib) TokenizeWithTrace(source string) []geno.TokenFromSource[g
 					CursorPos: l.CursorPos,
 				})
 				l.AdvanceN(len(took))
-				break
+				continue eofLoop
 			}
 		}
+
+		l.AdvanceN(1)
 	}
 
 	return result
